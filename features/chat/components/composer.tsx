@@ -15,7 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ArrowUp, SlidersHorizontal, Hammer } from "lucide-react"
+import { ArrowUp, SlidersHorizontal, Hammer, Square } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
 import { CHAT_ID, OPTIONS } from "../constants"
 import { useChatStore } from "../store"
@@ -30,7 +30,7 @@ export function Composer() {
   const setOption = useChatStore((s) => s.setOption)
   const toggleDeepForge = useChatStore((s) => s.toggleDeepForge)
 
-  const { sendMessage, status } = useChat({ id: CHAT_ID })
+  const { sendMessage, stop, status } = useChat({ id: CHAT_ID })
   const busy = status === "submitted" || status === "streaming"
 
   const send = () => {
@@ -129,14 +129,25 @@ export function Composer() {
             <TooltipContent>Deep Forge</TooltipContent>
           </Tooltip>
 
-          <Button
-            size="icon"
-            className="ml-auto size-8 shrink-0 rounded-full"
-            disabled={!input.trim() || busy}
-            onClick={send}
-          >
-            <ArrowUp className="size-4" />
-          </Button>
+          {busy ? (
+            <Button
+              size="icon"
+              variant="secondary"
+              className="ml-auto size-8 shrink-0 rounded-full"
+              onClick={stop}
+            >
+              <Square className="size-3.5 fill-current" />
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              className="ml-auto size-8 shrink-0 rounded-full"
+              disabled={!input.trim()}
+              onClick={send}
+            >
+              <ArrowUp className="size-4" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
