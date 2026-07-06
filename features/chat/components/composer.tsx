@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ArrowUp, SlidersHorizontal, Hammer, Square } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
-import { CHAT_ID, OPTIONS } from "../constants"
+import { OPTIONS } from "../constants"
+import { chat } from "../chat-instance"
 import { useChatStore } from "../store"
 
 export function Composer() {
@@ -30,7 +31,7 @@ export function Composer() {
   const setOption = useChatStore((s) => s.setOption)
   const toggleDeepForge = useChatStore((s) => s.toggleDeepForge)
 
-  const { sendMessage, stop, status } = useChat({ id: CHAT_ID })
+  const { sendMessage, stop, status } = useChat({ chat })
   const busy = status === "submitted" || status === "streaming"
 
   const send = () => {

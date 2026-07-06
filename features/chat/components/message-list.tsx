@@ -10,11 +10,11 @@ import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
 import { Button } from "@/components/ui/button"
 import { useChat } from "@ai-sdk/react"
 import { Sparkles, RotateCcw } from "lucide-react"
-import { CHAT_ID } from "../constants"
+import { chat } from "../chat-instance"
 
-// Shares the same useChat instance as the Composer via CHAT_ID.
+// Shares the same Chat instance as the Composer.
 export function MessageList() {
-  const { messages, status, error, regenerate } = useChat({ id: CHAT_ID })
+  const { messages, status, error, regenerate } = useChat({ chat })
 
   // "submitted" = request sent, no tokens yet → show typing bubble.
   const waiting = status === "submitted"
