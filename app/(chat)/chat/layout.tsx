@@ -24,7 +24,7 @@ export default async function ChatLayout({
   const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false"
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
+    <SidebarProvider defaultOpen={defaultOpen} className="h-svh overflow-hidden">
       {/* LEFT: navigation */}
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader>
@@ -51,15 +51,14 @@ export default async function ChatLayout({
       </Sidebar>
 
       {/* CENTER: prompt editor — flex-1, reflows as sidebars collapse */}
-      <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+      <SidebarInset className="flex flex-col overflow-hidden">
+        <header className="flex h-14 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-medium">Prompt Enhancer</h1>
-          {/* Trigger for the right sidebar, provided by RightSidebar below */}
           <div className="ml-auto" id="right-sidebar-trigger-slot" />
         </header>
-        <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </SidebarInset>
 
       {/* RIGHT: utility/settings — independent provider = independent toggle */}

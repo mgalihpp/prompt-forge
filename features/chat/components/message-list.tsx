@@ -1,117 +1,213 @@
+import { useChat } from "@ai-sdk/react";
+import type { UIMessage } from "ai";
+import { RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
-  MessageScrollerProvider,
-  MessageScroller,
-  MessageScrollerViewport,
-  MessageScrollerContent,
-  MessageScrollerItem,
-  MessageScrollerButton,
-} from "@/components/ui/message-scroller"
-import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
-import { Button } from "@/components/ui/button"
-import { useChat } from "@ai-sdk/react"
-import { Sparkles, RotateCcw } from "lucide-react"
-import { chat } from "../chat-instance"
+  Message,
+  MessageAvatar,
+  MessageContent,
+} from "@/components/ui/message";
+import { chat } from "../chat-instance";
+import { useForgyState } from "../hooks/use-forgy-state";
+import { useScrollFade } from "../hooks/use-scroll-fade";
+import { AssistantMessage } from "./assistant-message";
+import type { ForgyState } from "./forgy";
+import { ForgyMascot } from "./forgy-mascot";
+
+/** Concatenate every part of a message that matches `kind` into one string. */
+function collectText(message: UIMessage, kind: "text" | "reasoning") {
+  return message.parts
+    .map((part) => {
+      // Compare against string literals so TS narrows `part` to a kind that
+      // actually has `.text` (the union also holds tool/file/step parts).
+      if (part.type === "text" && kind === "text") return part.text;
+      if (part.type === "reasoning" && kind === "reasoning") return part.text;
+      return "";
+    })
+    .join("");
+}
+
+// ── Presentational pieces ──────────────────────────────────────────────────
+
+/** Hero shown before the first message is sent. */
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <ForgyMascot state="idle" className="size-24" />
+      <p className="text-2xl font-semibold tracking-tight text-foreground">
+        Enhance your prompt
+      </p>
+      <p className="max-w-md text-sm leading-6 text-muted-foreground">
+        Type a rough idea below. Prompt Forge will turn it into a clearer, more
+        useful prompt.
+      </p>
+    </div>
+  );
+}
+
+/** A user's message, right-aligned with the "You" avatar. */
+function UserBubble({ text }: { text: string }) {
+  return (
+    <Message align="end">
+      <MessageAvatar className="size-8 border bg-background text-[10px] font-semibold uppercase text-muted-foreground">
+        You
+      </MessageAvatar>
+      <MessageContent className="items-end">
+        <div className="w-fit max-w-[min(42rem,100%)] rounded-2xl rounded-tr-md border bg-background px-4 py-3 text-foreground shadow-sm">
+          {text}
+        </div>
+      </MessageContent>
+    </Message>
+  );
+}
+
+/**
+ * An assistant turn. The Forgy mascot is rendered only for the latest turn —
+ * pass `forgyState` to show it, or omit it for older turns.
+ */
+function AssistantTurn({
+  text,
+  reasoning,
+  streaming,
+  forgyState,
+}: {
+  text: string;
+  reasoning: string;
+  streaming: boolean;
+  forgyState?: ForgyState;
+}) {
+  return (
+    <div>
+      <Message align="start" className="max-w-[min(52rem,100%)]">
+        <MessageContent className="min-w-0 flex-1 pt-1">
+          <AssistantMessage
+            text={text}
+            reasoning={reasoning}
+            streaming={streaming}
+          />
+        </MessageContent>
+      </Message>
+      {forgyState && (
+        <ForgyMascot state={forgyState} className="my-4 size-12" />
+      )}
+    </div>
+  );
+}
+
+/** Bouncing dots + thinking mascot while the request is in flight. */
+function TypingIndicator() {
+  return (
+    <div>
+      <Message align="start" className="max-w-[min(52rem,100%)]">
+        <MessageContent className="w-fit rounded-2xl rounded-tl-md border bg-muted/45 px-4 py-3 shadow-sm">
+          <span className="flex gap-1.5">
+            <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.3s]" />
+            <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
+            <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60" />
+          </span>
+        </MessageContent>
+      </Message>
+      <ForgyMascot state="thinking" className="mt-4 size-12" />
+    </div>
+  );
+}
+
+/** Inline error banner with a retry action. */
+function ErrorNotice({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div>
+      <div className="mx-auto flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <span>Something went wrong.</span>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 gap-1.5 text-destructive hover:text-destructive"
+          onClick={onRetry}
+        >
+          <RotateCcw className="size-3.5" />
+          Retry
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** Dispatches one message to the right bubble based on its role. */
+function MessageRow({
+  message,
+  isLastAssistant,
+  streaming,
+  forgyState,
+}: {
+  message: UIMessage;
+  isLastAssistant: boolean;
+  streaming: boolean;
+  forgyState: ForgyState;
+}) {
+  if (message.role === "user") {
+    return <UserBubble text={collectText(message, "text")} />;
+  }
+
+  return (
+    <AssistantTurn
+      text={collectText(message, "text")}
+      reasoning={collectText(message, "reasoning")}
+      streaming={streaming && isLastAssistant}
+      forgyState={isLastAssistant ? forgyState : undefined}
+    />
+  );
+}
+
+// ── Container ──────────────────────────────────────────────────────────────
 
 // Shares the same Chat instance as the Composer.
 export function MessageList() {
-  const { messages, status, error, regenerate } = useChat({ chat })
+  const { messages, status, error, regenerate } = useChat({ chat });
 
   // "submitted" = request sent, no tokens yet → show typing bubble.
-  const waiting = status === "submitted"
+  const waiting = status === "submitted";
+
+  // Forgy's live expression + which assistant turn should wear it.
+  const forgyState = useForgyState(status, Boolean(error));
+  const lastAssistantId = waiting
+    ? undefined
+    : [...messages].reverse().find((m) => m.role === "assistant")?.id;
+
+  // Fade the scroll edges as content is covered above/below (see hook).
+  const { scrollRef, contentRef, onScroll, maskStyle } = useScrollFade();
+
+  if (messages.length === 0 && !waiting) {
+    return (
+      <div className="mb-6 flex flex-col items-center justify-center px-4 sm:px-6">
+        <EmptyState />
+      </div>
+    );
+  }
 
   return (
-    <MessageScrollerProvider>
-      <MessageScroller className="flex-1">
-        <MessageScrollerViewport className="px-4">
-          <MessageScrollerContent className="py-6">
-            {messages.length === 0 && !waiting && (
-              <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center text-muted-foreground">
-                <Sparkles className="size-8" />
-                <p className="text-lg font-medium text-foreground">
-                  Enhance your prompt
-                </p>
-                <p className="text-sm">Type a prompt below to get started.</p>
-              </div>
-            )}
+    <div
+      ref={scrollRef}
+      onScroll={onScroll}
+      style={maskStyle}
+      className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 sm:px-6"
+    >
+      <div
+        ref={contentRef}
+        className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-5 py-8"
+      >
+        {messages.map((message) => (
+          <MessageRow
+            key={message.id}
+            message={message}
+            isLastAssistant={message.id === lastAssistantId}
+            streaming={status === "streaming"}
+            forgyState={forgyState}
+          />
+        ))}
 
-            {messages.map((m) => {
-              const text = m.parts
-                .map((p) => (p.type === "text" ? p.text : ""))
-                .join("")
-              const reasoning = m.parts
-                .map((p) => (p.type === "reasoning" ? p.text : ""))
-                .join("")
-              return (
-                <MessageScrollerItem key={m.id}>
-                  {m.role === "user" ? (
-                    <Message align="end">
-                      <MessageContent>
-                        <div className="w-fit rounded-2xl bg-muted px-4 py-2.5">
-                          {text}
-                        </div>
-                      </MessageContent>
-                    </Message>
-                  ) : (
-                    <Message align="start">
-                      <MessageAvatar className="size-8">
-                        <Sparkles className="size-4" />
-                      </MessageAvatar>
-                      <MessageContent className="pt-1 leading-relaxed">
-                        {reasoning && (
-                          <details className="mb-2 rounded-lg border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                            <summary className="cursor-pointer select-none font-medium">
-                              Reasoning
-                            </summary>
-                            <p className="mt-1.5 whitespace-pre-wrap">
-                              {reasoning}
-                            </p>
-                          </details>
-                        )}
-                        <span className="whitespace-pre-wrap">{text}</span>
-                      </MessageContent>
-                    </Message>
-                  )}
-                </MessageScrollerItem>
-              )
-            })}
-
-            {waiting && (
-              <MessageScrollerItem>
-                <Message align="start">
-                  <MessageAvatar className="size-8">
-                    <Sparkles className="size-4" />
-                  </MessageAvatar>
-                  <MessageContent className="pt-2">
-                    <span className="flex gap-1">
-                      <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.3s]" />
-                      <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
-                      <span className="size-2 animate-bounce rounded-full bg-muted-foreground/60" />
-                    </span>
-                  </MessageContent>
-                </Message>
-              </MessageScrollerItem>
-            )}
-
-            {error && (
-              <MessageScrollerItem>
-                <div className="mx-auto flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  <span>Something went wrong.</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 gap-1.5 text-destructive hover:text-destructive"
-                    onClick={() => regenerate()}
-                  >
-                    <RotateCcw className="size-3.5" />
-                    Retry
-                  </Button>
-                </div>
-              </MessageScrollerItem>
-            )}
-          </MessageScrollerContent>
-        </MessageScrollerViewport>
-        <MessageScrollerButton />
-      </MessageScroller>
-    </MessageScrollerProvider>
-  )
+        {waiting && <TypingIndicator />}
+        {error && <ErrorNotice onRetry={() => regenerate()} />}
+      </div>
+    </div>
+  );
 }

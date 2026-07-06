@@ -1,0 +1,359 @@
+/* Forgy — the Prompt Smith mascot, ported from forgy-mascot.html.
+   State is driven by a class on the SVG root (.idle/.busy/.thinking/
+   .success/.error) instead of the demo's #forgy-root.state-* ids, so the
+   component is instance-safe. The <defs> gradient/filter ids stay fixed
+   and are duplicated per instance — every copy is identical, so url(#id)
+   resolves correctly in every browser (standard inline-SVG pattern). */
+
+.root {
+  --metal-light: #8a93a6;
+  --panel: #0e1016;
+  --ember: #14b8a6;
+  --ember-hot: #5eead4;
+  --gold: #2dd4bf;
+  --gold-hot: #99f6e4;
+  --success: #7ce8a4;
+  --error: #ff6b5e;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ---------- floor glow ---------- */
+.floorGlow {
+  fill: url(#floorGrad);
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+}
+
+/* ---------- default idle motion ---------- */
+.botGroup {
+  animation: bob 3.2s ease-in-out infinite;
+  transform-origin: 100px 180px;
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.core {
+  fill: url(#coreGrad);
+  transition: fill 0.3s ease;
+}
+.coreGlow {
+  animation: pulseCore 2.6s ease-in-out infinite;
+  transform-origin: 100px 124px;
+}
+@keyframes pulseCore {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+.eye {
+  fill: var(--ember-hot);
+  filter: url(#eyeGlow);
+}
+.antennaBulb {
+  fill: var(--gold);
+  filter: url(#eyeGlow);
+}
+
+/* ---------- blink ---------- */
+.canBlink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blinkEyes 4.8s ease-in-out infinite;
+}
+@keyframes blinkEyes {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+  97.5% {
+    transform: scaleY(1);
+  }
+}
+
+/* ---------- hammer ---------- */
+.hammerArm {
+  transform-origin: 148px 84px;
+}
+/* plain hand by default; the hammer head only appears while busy */
+.hammerHead {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.handCap {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+.busy .hammerHead {
+  opacity: 1;
+}
+.busy .handCap {
+  opacity: 0;
+}
+
+/* ---------- anvil + sparks (busy only) ---------- */
+.anvilGroup,
+.sparksGroup {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.spark {
+  transform-origin: center;
+}
+
+/* ---------- hologram (thinking only) ---------- */
+.holoGroup {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* ---------- ingot (success only) ---------- */
+.ingotGroup {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* ---------- expression groups ---------- */
+.faceIdle,
+.faceBusy,
+.faceThinking,
+.faceHappy,
+.faceConfused {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.faceIdle {
+  opacity: 1;
+}
+
+/* =========================================================
+   STATE: BUSY
+========================================================= */
+.busy .faceIdle {
+  opacity: 0;
+}
+.busy .faceBusy {
+  opacity: 1;
+}
+.busy .anvilGroup,
+.busy .sparksGroup {
+  opacity: 1;
+}
+.busy .botGroup {
+  animation: none;
+}
+.busy .hammerArm {
+  animation: hammerSwing 0.85s cubic-bezier(0.7, 0, 0.3, 1) infinite;
+}
+.busy .coreGlow {
+  animation: pulseCore 0.85s ease-in-out infinite;
+}
+/* Raise the hammer UP AND OVER the shoulder (~165deg) so the wind-up reads
+   as an overhead swing, then chop straight down to rotate(0) where the head
+   lands on the anvil — keeps the arc vertical, not a sideways swipe. */
+@keyframes hammerSwing {
+  0% {
+    transform: rotate(165deg);
+  }
+  42% {
+    transform: rotate(165deg);
+  }
+  54% {
+    transform: rotate(-6deg);
+  }
+  62% {
+    transform: rotate(14deg);
+  }
+  74% {
+    transform: rotate(4deg);
+  }
+  100% {
+    transform: rotate(165deg);
+  }
+}
+.busy .spark {
+  animation: sparkFly 0.85s linear infinite;
+}
+.busy .spark:nth-child(2) {
+  animation-delay: 0.03s;
+}
+.busy .spark:nth-child(3) {
+  animation-delay: 0.05s;
+}
+.busy .spark:nth-child(4) {
+  animation-delay: 0.08s;
+}
+/* stays invisible through the wind-up, then bursts as the hammer makes
+   contact (~54% through the cycle) */
+@keyframes sparkFly {
+  0%,
+  50% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3);
+  }
+  56% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 10px), var(--ty, -24px)) scale(1);
+  }
+}
+
+/* =========================================================
+   STATE: THINKING
+========================================================= */
+.thinking .faceIdle {
+  opacity: 0;
+}
+.thinking .faceThinking {
+  opacity: 1;
+}
+.thinking .holoGroup {
+  opacity: 1;
+  animation: holoFlicker 2.4s ease-in-out infinite;
+}
+.thinking .antennaBulb {
+  animation: antennaBlink 1.1s steps(1) infinite;
+}
+.thinking .hammerArm {
+  transform: rotate(-10deg);
+}
+@keyframes holoFlicker {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  45% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  55% {
+    opacity: 1;
+  }
+}
+@keyframes antennaBlink {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.15;
+  }
+  90% {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   STATE: SUCCESS
+========================================================= */
+.success .faceIdle {
+  opacity: 0;
+}
+.success .faceHappy {
+  opacity: 1;
+}
+.success .ingotGroup {
+  opacity: 1;
+  animation: ingotShine 1.8s ease-in-out infinite;
+}
+.success .hammerArm {
+  transform: rotate(170deg);
+}
+.success .armL {
+  transform: rotate(28deg);
+  transform-origin: 52px 84px;
+}
+.success .botGroup {
+  animation: successBounce 1.4s ease-in-out infinite;
+}
+@keyframes successBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+}
+@keyframes ingotShine {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px var(--gold-hot));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px var(--gold-hot));
+  }
+}
+
+/* =========================================================
+   STATE: ERROR
+========================================================= */
+.error .faceIdle {
+  opacity: 0;
+}
+.error .faceConfused {
+  opacity: 1;
+}
+.error .hammerArm {
+  transform: rotate(35deg);
+}
+.error .core {
+  fill: url(#coreGradDim);
+}
+.error .coreGlow {
+  animation: pulseDim 2.2s ease-in-out infinite;
+  fill: var(--error);
+}
+.error .botGroup {
+  animation: wobble 2.6s ease-in-out infinite;
+}
+@keyframes pulseDim {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}

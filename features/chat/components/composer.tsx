@@ -43,21 +43,22 @@ export function Composer() {
   }
 
   return (
-    <div className="px-4 pb-4">
-      <div className="flex flex-col gap-2 rounded-2xl border bg-background p-2 shadow-sm focus-within:ring-1 focus-within:ring-ring">
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault()
-              send()
-            }
-          }}
-          placeholder="Write a prompt to enhance…"
-          className="max-h-40 min-h-9 resize-none border-none bg-transparent py-1.5 shadow-none focus-visible:ring-0"
-        />
-        <div className="flex items-center gap-1.5">
+    <div className="shrink-0 bg-background/80 px-4 backdrop-blur-xl sm:px-6">
+      <div className="mx-auto w-full max-w-4xl pb-4">
+        <div className="flex flex-col gap-2 rounded-3xl border bg-background p-2 shadow-lg shadow-muted/40 focus-within:ring-1 focus-within:ring-ring">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault()
+                send()
+              }
+            }}
+            placeholder="Apa yang bisa saya bantu hari ini?"
+            className="max-h-40 min-h-10 resize-none border-none bg-transparent px-3 py-2 shadow-none focus-visible:ring-0"
+          />
+          <div className="flex items-center gap-1.5 px-1 pb-1">
           <DropdownMenu>
             <Tooltip>
               <DropdownMenuTrigger
@@ -150,6 +151,7 @@ export function Composer() {
             </Button>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

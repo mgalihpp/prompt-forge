@@ -1,0 +1,92 @@
+import { Check, ChevronRight, Copy } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/ui/markdown";
+import { cn } from "@/lib/utils";
+
+// The assistant reply is the product of this app (an enhanced prompt), so it
+// gets a distinct surface, rich markdown, a collapsible reasoning trail, and a
+// one-tap copy action — the thing users actually came here to take away.
+export function AssistantMessage({
+  text,
+  reasoning,
+  streaming,
+}: {
+  text: string;
+  reasoning?: string;
+  streaming?: boolean;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      // Clipboard can reject (permissions / insecure origin); fail silently.
+    }
+  };
+
+  return (
+    <div className="group/assistant flex w-full min-w-0 flex-col gap-1.5">
+      <div className="min-w-0 rounded-2xl rounded-tl-md border bg-card px-4 py-3 text-card-foreground shadow-sm">
+        {reasoning && <Reasoning text={reasoning} />}
+
+        {text ? (
+          <Markdown>{text}</Markdown>
+        ) : (
+          streaming && (
+            <span className="inline-block h-4 w-2 animate-pulse rounded-sm bg-muted-foreground/50 align-middle" />
+          )
+        )}
+      </div>
+
+      {/* Action row — always visible so the copy action is one tap away. */}
+      {text && !streaming && (
+        <div className="flex items-center gap-1 pl-1">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-7 text-muted-foreground hover:text-foreground"
+            onClick={copy}
+            aria-label={copied ? "Copied" : "Copy"}
+          >
+            {copied ? (
+              <Check className="size-3.5 text-primary" />
+            ) : (
+              <Copy className="size-3.5" />
+            )}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Collapsed by default: the enhanced prompt is the headline, the model's
+// reasoning is supporting detail one click away.
+function Reasoning({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mb-2.5 border-b border-dashed pb-2.5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ChevronRight
+          className={cn("size-3.5 transition-transform", open && "rotate-90")}
+        />
+        Reasoning
+      </button>
+      {open && (
+        <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground">
+          {text}
+        </p>
+      )}
+    </div>
+  );
+}
