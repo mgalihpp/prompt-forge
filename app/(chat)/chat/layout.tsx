@@ -4,6 +4,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -12,8 +13,16 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
-import { History, Plus, Settings2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { NavUser } from "@/features/chat/components/nav-user"
+import {
+  FolderOpen,
+  Hammer,
+  LayoutTemplate,
+  Plus,
+  Search,
+  Settings2,
+} from "lucide-react"
 
 export default async function ChatLayout({
   children,
@@ -29,10 +38,14 @@ export default async function ChatLayout({
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip="New prompt">
-                <Plus /> <span>New prompt</span>
+            <SidebarMenuItem className="flex items-center gap-2">
+              <SidebarMenuButton size="lg" tooltip="Prompt Forge" className="group-data-[collapsible=icon]:hidden hover:bg-transparent">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Hammer className="size-4" />
+                </div>
+                <span className="font-semibold">Prompt Forge</span>
               </SidebarMenuButton>
+              <SidebarTrigger />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
@@ -40,23 +53,60 @@ export default async function ChatLayout({
           <SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="History">
-                  <History /> <span>History</span>
+                <SidebarMenuButton tooltip="New chat">
+                  <Plus /> <span>New chat</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Search">
+                  <Search /> <span>Search</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Library</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Collection">
+                  <FolderOpen /> <span>Collection</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Templates">
+                  <LayoutTemplate /> <span>Templates</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+          {/* Separate group in the nav flow — chat history list renders here */}
+          <SidebarGroup>
+            <SidebarGroupLabel>History</SidebarGroupLabel>
+            <SidebarMenu>{/* chat history items */}</SidebarMenu>
+          </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter />
+        <SidebarFooter>
+          <div className="flex flex-col gap-3 rounded-xl border p-3 group-data-[collapsible=icon]:hidden">
+            <span className="text-sm font-semibold">Free Plan</span>
+            <p className="text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground">0</span> / 10 prompts used today
+            </p>
+            <Button size="sm" className="w-full">Upgrade to Pro</Button>
+          </div>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <NavUser />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
       </Sidebar>
 
       {/* CENTER: prompt editor — flex-1, reflows as sidebars collapse */}
       <SidebarInset className="flex flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center gap-2 px-4">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <h1 className="text-sm font-medium">Prompt Enhancer</h1>
-          <div className="ml-auto" id="right-sidebar-trigger-slot" />
+          <div className="ml-auto flex items-center gap-3">
+            <div id="right-sidebar-trigger-slot" />
+          </div>
         </header>
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </SidebarInset>

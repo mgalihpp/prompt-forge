@@ -56,7 +56,7 @@ export function Composer() {
               }
             }}
             placeholder="Drop a rough prompt and I'll forge it into something sharper…"
-            className="max-h-40 min-h-10 resize-none border-none bg-transparent px-3 py-2 shadow-none focus-visible:ring-0"
+            className="max-h-40 min-h-10 resize-none border-none bg-transparent px-3 py-2 shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
           <div className="flex items-center gap-1.5 px-1 pb-1">
           <DropdownMenu>
@@ -81,10 +81,10 @@ export function Composer() {
             <DropdownMenuContent align="start" className="w-56 p-1.5">
               {Object.entries(OPTIONS).map(([key, { icon: Icon, values }]) => (
                 <DropdownMenuSub key={key}>
-                  <DropdownMenuSubTrigger className="gap-2 rounded-md py-2 text-xs">
+                  <DropdownMenuSubTrigger className="gap-2 rounded-md py-2 text-xs [&>svg:last-child]:!ml-1">
                     <Icon className="size-4 text-muted-foreground" />
                     <span className="capitalize">{key}</span>
-                    <span className="ml-auto rounded-full bg-muted px-2 py-0.5 font-medium text-foreground">
+                    <span className="ml-auto font-medium text-muted-foreground">
                       {opts[key]}
                     </span>
                   </DropdownMenuSubTrigger>
