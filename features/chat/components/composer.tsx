@@ -55,7 +55,7 @@ export function Composer() {
                 send()
               }
             }}
-            placeholder="Apa yang bisa saya bantu hari ini?"
+            placeholder="Drop a rough prompt and I'll forge it into something sharper…"
             className="max-h-40 min-h-10 resize-none border-none bg-transparent px-3 py-2 shadow-none focus-visible:ring-0"
           />
           <div className="flex items-center gap-1.5 px-1 pb-1">

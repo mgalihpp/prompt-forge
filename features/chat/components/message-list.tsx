@@ -33,7 +33,7 @@ function collectText(message: UIMessage, kind: "text" | "reasoning") {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
-      <ForgyMascot state="idle" className="size-24" />
+      <ForgyMascot state="idle" className="size-24" autoWave />
       <p className="text-2xl font-semibold tracking-tight text-foreground">
         Enhance your prompt
       </p>
@@ -88,7 +88,7 @@ function AssistantTurn({
         </MessageContent>
       </Message>
       {forgyState && (
-        <ForgyMascot state={forgyState} className="my-4 size-12" />
+        <ForgyMascot state={forgyState} className="my-4 size-12" autoWave />
       )}
     </div>
   );

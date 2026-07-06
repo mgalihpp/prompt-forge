@@ -16,14 +16,17 @@ export type ForgyState =
 // chrome (title/buttons/label) is intentionally dropped.
 export function Forgy({
   state = "idle",
+  waving = false,
   className,
 }: {
   state?: ForgyState
+  /** Play the one-shot wave gesture (only visible in the idle pose). */
+  waving?: boolean
   className?: string
 }) {
   return (
     <svg
-      className={cn(styles.root, styles[state], className)}
+      className={cn(styles.root, styles[state], waving && styles.wave, className)}
       viewBox="0 0 200 220"
       preserveAspectRatio="xMidYMid meet"
       role="img"

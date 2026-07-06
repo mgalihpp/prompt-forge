@@ -92,6 +92,39 @@
   }
 }
 
+/* ---------- wave (idle greeting + on click) ---------- */
+.armL {
+  transform-origin: 52px 88px;
+}
+/* One-shot friendly wave — only in the resting pose, where the left arm is
+   otherwise static. Toggling the `.wave` class off/on restarts the gesture. */
+.idle.wave .armL {
+  animation: forgyWave 1.4s ease-in-out;
+}
+@keyframes forgyWave {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(140deg);
+  }
+  35% {
+    transform: rotate(116deg);
+  }
+  50% {
+    transform: rotate(140deg);
+  }
+  65% {
+    transform: rotate(116deg);
+  }
+  80% {
+    transform: rotate(140deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
 /* ---------- hammer ---------- */
 .hammerArm {
   transform-origin: 148px 84px;
