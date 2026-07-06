@@ -1,19 +1,18 @@
 import { create } from "zustand"
-import { defaultOptions, type Msg } from "./constants"
+import { defaultOptions } from "./constants"
 
+// Messages/streaming now live in useChat (AI SDK). The store only holds the
+// composer input + prompt options, which the route reads as request body.
 type ChatState = {
-  messages: Msg[]
   input: string
   deepForge: boolean
   opts: Record<string, string>
   setInput: (input: string) => void
   setOption: (key: string, value: string) => void
   toggleDeepForge: () => void
-  send: () => void
 }
 
-export const useChatStore = create<ChatState>((set, get) => ({
-  messages: [],
+export const useChatStore = create<ChatState>((set) => ({
   input: "",
   deepForge: false,
   opts: defaultOptions(),
@@ -22,20 +21,4 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setOption: (key, value) =>
     set((s) => ({ opts: { ...s.opts, [key]: value } })),
   toggleDeepForge: () => set((s) => ({ deepForge: !s.deepForge })),
-
-  send: () => {
-    const { input, messages } = get()
-    const text = input.trim()
-    if (!text) return
-    const id = messages.length
-    // ponytail: fake assistant echo — swap for oRPC stream when backend lands
-    set({
-      messages: [
-        ...messages,
-        { id, role: "user", text },
-        { id: id + 1, role: "assistant", text: `Enhanced: ${text}` },
-      ],
-      input: "",
-    })
-  },
 }))

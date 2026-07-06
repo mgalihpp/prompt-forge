@@ -7,7 +7,8 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
-export type Msg = { id: number; role: "user" | "assistant"; text: string }
+// Shared id so Composer and MessageList bind to the same useChat instance.
+export const CHAT_ID = "forge"
 
 export const OPTIONS: Record<
   string,

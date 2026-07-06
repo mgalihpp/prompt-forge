@@ -7,12 +7,13 @@ import {
   MessageScrollerButton,
 } from "@/components/ui/message-scroller"
 import { Message, MessageAvatar, MessageContent } from "@/components/ui/message"
+import { useChat } from "@ai-sdk/react"
 import { Sparkles } from "lucide-react"
-import { useChatStore } from "../store"
+import { CHAT_ID } from "../constants"
 
+// Shares the same useChat instance as the Composer via CHAT_ID.
 export function MessageList() {
-  // Only re-renders when the messages array changes — not on every keystroke.
-  const messages = useChatStore((s) => s.messages)
+  const { messages } = useChat({ id: CHAT_ID })
   return (
     <MessageScrollerProvider>
       <MessageScroller className="flex-1">
@@ -28,28 +29,33 @@ export function MessageList() {
               </div>
             )}
 
-            {messages.map((m) => (
-              <MessageScrollerItem key={m.id}>
-                {m.role === "user" ? (
-                  <Message align="end">
-                    <MessageContent>
-                      <div className="w-fit rounded-2xl bg-muted px-4 py-2.5">
-                        {m.text}
-                      </div>
-                    </MessageContent>
-                  </Message>
-                ) : (
-                  <Message align="start">
-                    <MessageAvatar className="size-8">
-                      <Sparkles className="size-4" />
-                    </MessageAvatar>
-                    <MessageContent className="pt-1 leading-relaxed">
-                      {m.text}
-                    </MessageContent>
-                  </Message>
-                )}
-              </MessageScrollerItem>
-            ))}
+            {messages.map((m) => {
+              const text = m.parts
+                .map((p) => (p.type === "text" ? p.text : ""))
+                .join("")
+              return (
+                <MessageScrollerItem key={m.id}>
+                  {m.role === "user" ? (
+                    <Message align="end">
+                      <MessageContent>
+                        <div className="w-fit rounded-2xl bg-muted px-4 py-2.5">
+                          {text}
+                        </div>
+                      </MessageContent>
+                    </Message>
+                  ) : (
+                    <Message align="start">
+                      <MessageAvatar className="size-8">
+                        <Sparkles className="size-4" />
+                      </MessageAvatar>
+                      <MessageContent className="pt-1 leading-relaxed whitespace-pre-wrap">
+                        {text}
+                      </MessageContent>
+                    </Message>
+                  )}
+                </MessageScrollerItem>
+              )
+            })}
           </MessageScrollerContent>
         </MessageScrollerViewport>
         <MessageScrollerButton />

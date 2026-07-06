@@ -16,7 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ArrowUp, SlidersHorizontal, Hammer } from "lucide-react"
-import { OPTIONS } from "../constants"
+import { useChat } from "@ai-sdk/react"
+import { CHAT_ID, OPTIONS } from "../constants"
 import { useChatStore } from "../store"
 
 export function Composer() {
@@ -28,7 +29,17 @@ export function Composer() {
   const setInput = useChatStore((s) => s.setInput)
   const setOption = useChatStore((s) => s.setOption)
   const toggleDeepForge = useChatStore((s) => s.toggleDeepForge)
-  const send = useChatStore((s) => s.send)
+
+  const { sendMessage, status } = useChat({ id: CHAT_ID })
+  const busy = status === "submitted" || status === "streaming"
+
+  const send = () => {
+    const text = input.trim()
+    if (!text || busy) return
+    // opts + deepForge ride along as request body → read by /api/chat
+    sendMessage({ text }, { body: { opts, deepForge } })
+    setInput("")
+  }
 
   return (
     <div className="px-4 pb-4">
@@ -121,7 +132,7 @@ export function Composer() {
           <Button
             size="icon"
             className="ml-auto size-8 shrink-0 rounded-full"
-            disabled={!input.trim()}
+            disabled={!input.trim() || busy}
             onClick={send}
           >
             <ArrowUp className="size-4" />
