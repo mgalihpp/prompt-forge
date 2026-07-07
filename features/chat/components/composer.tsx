@@ -43,8 +43,8 @@ export function Composer() {
   }
 
   return (
-    <div className="shrink-0 bg-background/80 px-4 backdrop-blur-xl sm:px-6">
-      <div className="mx-auto w-full max-w-4xl pb-4">
+    <div className="shrink-0 bg-background/80 backdrop-blur-xl">
+      <div className="pb-4">
         <div className="flex flex-col gap-2 rounded-3xl border bg-background p-2 shadow-lg shadow-muted/40 focus-within:ring-1 focus-within:ring-ring">
           <Textarea
             value={input}

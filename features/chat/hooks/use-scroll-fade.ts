@@ -12,17 +12,35 @@ const FADE_LENGTH = "3.5rem";
 const EDGE_THRESHOLD = 8;
 
 /**
+ * Find the nearest scrollable ancestor (overflow-y auto/scroll).
+ */
+function findScrollParent(el: HTMLElement): HTMLElement | null {
+  let node = el.parentElement;
+  while (node) {
+    const style = getComputedStyle(node);
+    const overflowY = style.overflowY;
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight
+    ) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
+/**
  * Scroll-aware edge fade for a scroll container.
  *
- * Returns `scrollRef` for the scrollable element, `contentRef` for its inner
- * content wrapper, an `onScroll` handler, and a `maskStyle` that softly
- * dissolves the top/bottom edge — but only while there is still content hidden
- * past that edge, so a hard clip never looks abrupt and a fully-scrolled edge
- * stays crisp.
+ * Returns `scrollRef` for the element whose edges should fade, `contentRef`
+ * for its inner content wrapper, an `onScroll` handler, and a `maskStyle`
+ * that softly dissolves the top/bottom edge — but only while there is still
+ * content hidden past that edge, so a hard clip never looks abrupt and a
+ * fully-scrolled edge stays crisp.
  *
- * A `ResizeObserver` on both elements re-measures the edges when content
- * changes height without firing a scroll event (new messages, streaming
- * growth, viewport resize).
+ * Detects the nearest scrollable ancestor automatically, so the scroll
+ * container can live outside this component (e.g. a parent chat wrapper).
  */
 export function useScrollFade() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -32,7 +50,8 @@ export function useScrollFade() {
   const onScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const { scrollTop, scrollHeight, clientHeight } = el;
+    const scroller = findScrollParent(el) ?? el;
+    const { scrollTop, scrollHeight, clientHeight } = scroller;
     setEdges({
       top: scrollTop > EDGE_THRESHOLD,
       bottom: scrollTop + clientHeight < scrollHeight - EDGE_THRESHOLD,
@@ -40,13 +59,18 @@ export function useScrollFade() {
   }, []);
 
   useEffect(() => {
-    const scroller = scrollRef.current;
-    if (!scroller) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const scroller = findScrollParent(el) ?? el;
     const observer = new ResizeObserver(onScroll);
     observer.observe(scroller);
     if (contentRef.current) observer.observe(contentRef.current);
+    scroller.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      scroller.removeEventListener("scroll", onScroll);
+    };
   }, [onScroll]);
 
   const start = edges.top ? "transparent" : "black";

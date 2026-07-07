@@ -33,7 +33,7 @@ export default async function ChatLayout({
   const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false"
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen} className="h-svh overflow-hidden">
+    <SidebarProvider defaultOpen={defaultOpen}>
       {/* LEFT: navigation */}
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader>
@@ -102,7 +102,7 @@ export default async function ChatLayout({
       </Sidebar>
 
       {/* CENTER: prompt editor — flex-1, reflows as sidebars collapse */}
-      <SidebarInset className="flex flex-col overflow-hidden">
+      <SidebarInset className="flex flex-col">
         <header className="flex h-14 shrink-0 items-center gap-2 px-4">
           <div className="ml-auto flex items-center gap-3">
             <div id="right-sidebar-trigger-slot" />

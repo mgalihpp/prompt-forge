@@ -4,12 +4,10 @@ import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Message,
-  MessageAvatar,
   MessageContent,
 } from "@/components/ui/message";
 import { chat } from "../chat-instance";
 import { useForgyState } from "../hooks/use-forgy-state";
-import { useScrollFade } from "../hooks/use-scroll-fade";
 import { AssistantMessage } from "./assistant-message";
 import type { ForgyState } from "./forgy";
 import { ForgyMascot } from "./forgy-mascot";
@@ -49,9 +47,6 @@ function EmptyState() {
 function UserBubble({ text }: { text: string }) {
   return (
     <Message align="end">
-      <MessageAvatar className="size-8 border bg-background text-[10px] font-semibold uppercase text-muted-foreground">
-        You
-      </MessageAvatar>
       <MessageContent className="items-end">
         <div className="w-fit max-w-[min(42rem,100%)] rounded-2xl rounded-tr-md border bg-background px-4 py-3 text-foreground shadow-sm">
           {text}
@@ -173,28 +168,13 @@ export function MessageList() {
     ? undefined
     : [...messages].reverse().find((m) => m.role === "assistant")?.id;
 
-  // Fade the scroll edges as content is covered above/below (see hook).
-  const { scrollRef, contentRef, onScroll, maskStyle } = useScrollFade();
-
   if (messages.length === 0 && !waiting) {
-    return (
-      <div className="mb-6 flex flex-col items-center justify-center px-4 sm:px-6">
-        <EmptyState />
-      </div>
-    );
+    return <EmptyState />;
   }
 
   return (
-    <div
-      ref={scrollRef}
-      onScroll={onScroll}
-      style={maskStyle}
-      className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 sm:px-6"
-    >
-      <div
-        ref={contentRef}
-        className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-5 py-8"
-      >
+    <div className="flex flex-col py-8">
+      <div className="flex w-full flex-col gap-5">
         {messages.map((message) => (
           <MessageRow
             key={message.id}
