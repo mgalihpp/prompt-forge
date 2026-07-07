@@ -5,8 +5,7 @@ import {
   FileText,
   Target,
   type LucideIcon,
-} from "lucide-react"
-
+} from "lucide-react";
 
 export const OPTIONS: Record<
   string,
@@ -29,7 +28,7 @@ export const OPTIONS: Record<
     icon: Target,
     values: ["ChatGPT", "Claude", "Gemini", "Generic"],
   },
-}
+};
 
 export const defaultOptions = (): Record<string, string> =>
-  Object.fromEntries(Object.entries(OPTIONS).map(([k, v]) => [k, v.values[0]]))
+  Object.fromEntries(Object.entries(OPTIONS).map(([k, v]) => [k, v.values[0]]));

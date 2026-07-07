@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 const PLANS = [
   {
@@ -13,7 +13,7 @@ const PLANS = [
     desc: "Advanced controls for growing teams.",
     features: ["Unlimited prompts", "Shared collections", "Priority support"],
   },
-]
+];
 
 export default function BillingSettingsPage() {
   return (
@@ -44,7 +44,10 @@ export default function BillingSettingsPage() {
         <h2 className="text-lg font-semibold">Change your plan</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {PLANS.map((plan) => (
-            <div key={plan.name} className="flex flex-col gap-4 rounded-xl border p-5">
+            <div
+              key={plan.name}
+              className="flex flex-col gap-4 rounded-xl border p-5"
+            >
               <div>
                 <p className="text-lg font-semibold">{plan.name}</p>
                 <p className="text-sm text-muted-foreground">{plan.desc}</p>
@@ -66,5 +69,5 @@ export default function BillingSettingsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

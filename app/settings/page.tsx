@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { useClerk, useUser } from "@clerk/nextjs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { useClerk, useUser } from "@clerk/nextjs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 export default function GeneralSettingsPage() {
-  const { user } = useUser()
-  const { openUserProfile } = useClerk()
+  const { user } = useUser();
+  const { openUserProfile } = useClerk();
 
-  const name = user?.fullName ?? "Account"
-  const email = user?.primaryEmailAddress?.emailAddress ?? ""
-  const initials = name.slice(0, 2).toUpperCase()
+  const name = user?.fullName ?? "Account";
+  const email = user?.primaryEmailAddress?.emailAddress ?? "";
+  const initials = name.slice(0, 2).toUpperCase();
 
   return (
     <div className="flex flex-col gap-6">
@@ -35,5 +35,5 @@ export default function GeneralSettingsPage() {
         </Button>
       </div>
     </div>
-  )
+  );
 }

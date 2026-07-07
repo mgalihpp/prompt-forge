@@ -2,10 +2,7 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Message,
-  MessageContent,
-} from "@/components/ui/message";
+import { Message, MessageContent } from "@/components/ui/message";
 import { chat } from "../chat-instance";
 import { useForgyState } from "../hooks/use-forgy-state";
 import { AssistantMessage } from "./assistant-message";

@@ -1,5 +1,5 @@
-import { Chat } from "@ai-sdk/react"
-import { DefaultChatTransport } from "ai"
+import { Chat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 // Single shared Chat instance so Composer (sendMessage) and MessageList
 // (messages/status) stay in sync. Passing the same `id` string does NOT
@@ -7,4 +7,4 @@ import { DefaultChatTransport } from "ai"
 // ponytail: one chat surface, so a module singleton is enough.
 export const chat = new Chat({
   transport: new DefaultChatTransport({ api: "/api/chat" }),
-})
+});

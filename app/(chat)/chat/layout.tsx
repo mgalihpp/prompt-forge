@@ -1,4 +1,4 @@
-import { cookies } from "next/headers"
+import { cookies } from "next/headers";
 import {
   Sidebar,
   SidebarContent,
@@ -12,9 +12,9 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
-import { NavUser } from "@/features/chat/components/nav-user"
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { NavUser } from "@/features/chat/components/nav-user";
 import {
   FolderOpen,
   Hammer,
@@ -22,15 +22,15 @@ import {
   Plus,
   Search,
   Settings2,
-} from "lucide-react"
+} from "lucide-react";
 
 export default async function ChatLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   // Restore left sidebar state from cookie so SSR matches client (no flash).
-  const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false"
+  const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false";
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
@@ -39,7 +39,11 @@ export default async function ChatLayout({
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton size="lg" tooltip="Prompt Forge" className="group-data-[collapsible=icon]:hidden hover:bg-transparent">
+              <SidebarMenuButton
+                size="lg"
+                tooltip="Prompt Forge"
+                className="group-data-[collapsible=icon]:hidden hover:bg-transparent"
+              >
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Hammer className="size-4" />
                 </div>
@@ -89,9 +93,12 @@ export default async function ChatLayout({
           <div className="flex flex-col gap-3 rounded-xl border p-3 group-data-[collapsible=icon]:hidden">
             <span className="text-sm font-semibold">Free Plan</span>
             <p className="text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground">0</span> / 10 prompts used today
+              <span className="font-semibold text-foreground">0</span> / 10
+              prompts used today
             </p>
-            <Button size="sm" className="w-full">Upgrade to Pro</Button>
+            <Button size="sm" className="w-full">
+              Upgrade to Pro
+            </Button>
           </div>
           <SidebarMenu>
             <SidebarMenuItem>
@@ -119,10 +126,12 @@ export default async function ChatLayout({
             <span className="text-sm font-medium">Settings</span>
           </SidebarHeader>
           <SidebarContent>
-            <SidebarGroup>{/* model, temperature, tone controls */}</SidebarGroup>
+            <SidebarGroup>
+              {/* model, temperature, tone controls */}
+            </SidebarGroup>
           </SidebarContent>
         </Sidebar>
       </SidebarProvider>
     </SidebarProvider>
-  )
+  );
 }

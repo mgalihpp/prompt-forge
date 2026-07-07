@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useClerk, useUser } from "@clerk/nextjs"
-import { useRouter } from "next/navigation"
+import { useClerk, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import {
   ChevronsUpDown,
   CreditCard,
   LogOut,
   Palette,
   Settings,
-} from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,19 +17,19 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar"
+} from "@/components/ui/dropdown-menu";
+import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 
 export function NavUser() {
-  const { user } = useUser()
-  const { signOut } = useClerk()
-  const { isMobile } = useSidebar()
-  const router = useRouter()
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const { isMobile } = useSidebar();
+  const router = useRouter();
 
-  const name = user?.fullName ?? "Account"
-  const email = user?.primaryEmailAddress?.emailAddress ?? ""
-  const avatar = user?.imageUrl
-  const initials = name.slice(0, 2).toUpperCase()
+  const name = user?.fullName ?? "Account";
+  const email = user?.primaryEmailAddress?.emailAddress ?? "";
+  const avatar = user?.imageUrl;
+  const initials = name.slice(0, 2).toUpperCase();
 
   return (
     <DropdownMenu>
@@ -47,7 +47,9 @@ export function NavUser() {
         </Avatar>
         <div className="grid flex-1 text-left text-sm leading-tight">
           <span className="truncate font-medium">{name}</span>
-          <span className="truncate text-xs text-muted-foreground">{email}</span>
+          <span className="truncate text-xs text-muted-foreground">
+            {email}
+          </span>
         </div>
         <ChevronsUpDown className="ml-auto size-4" />
       </DropdownMenuTrigger>
@@ -74,7 +76,8 @@ export function NavUser() {
             className="gap-2 rounded-md py-2 text-xs"
             onClick={() => router.push("/settings/billing")}
           >
-            <CreditCard className="size-4 text-muted-foreground" /> Billing & plan
+            <CreditCard className="size-4 text-muted-foreground" /> Billing &
+            plan
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -86,5 +89,5 @@ export function NavUser() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
