@@ -1,3 +1,4 @@
+import { memo, useCallback, useSyncExternalStore } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,48 +17,69 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ArrowUp, SlidersHorizontal, Hammer, Square } from "lucide-react";
-import { useChat } from "@ai-sdk/react";
 import { OPTIONS } from "../constants";
 import { chat } from "../chat-instance";
 import { useChatStore } from "../store";
 
-export function Composer() {
-  // Primitive/action selectors: each returns a stable ref, so subscribing
-  // here doesn't drag the message list into re-rendering on keystrokes.
+function useChatStatus() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      const unsub = (chat as any)["~registerStatusCallback"](onStoreChange);
+      return unsub;
+    },
+    () => chat.status,
+    () => "ready" as const,
+  );
+}
+
+const ChatInput = memo(function ChatInput({
+  onSend,
+}: {
+  onSend: () => void;
+}) {
   const input = useChatStore((s) => s.input);
+  const setInput = useChatStore((s) => s.setInput);
+
+  return (
+    <Textarea
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          onSend();
+        }
+      }}
+      placeholder="Drop a rough prompt and I'll forge it into something sharper…"
+      className="max-h-40 min-h-10 resize-none border-none bg-transparent px-3 py-2 shadow-none focus-visible:ring-0 dark:bg-transparent"
+    />
+  );
+});
+
+export function Composer() {
   const opts = useChatStore((s) => s.opts);
   const deepForge = useChatStore((s) => s.deepForge);
-  const setInput = useChatStore((s) => s.setInput);
+  const hasInput = useChatStore((s) => s.input.trim().length > 0);
   const setOption = useChatStore((s) => s.setOption);
   const toggleDeepForge = useChatStore((s) => s.toggleDeepForge);
 
-  const { sendMessage, stop, status } = useChat({ chat });
+  const status = useChatStatus();
   const busy = status === "submitted" || status === "streaming";
 
-  const send = () => {
+  const send = useCallback(() => {
+    const { input, opts, deepForge } = useChatStore.getState();
     const text = input.trim();
     if (!text || busy) return;
-    // opts + deepForge ride along as request body → read by /api/chat
-    sendMessage({ text }, { body: { opts, deepForge } });
-    setInput("");
-  };
+    chat.sendMessage({ text }, { body: { opts, deepForge } });
+    useChatStore.setState({ input: "" });
+  }, [busy]);
 
   return (
     <div className="shrink-0 bg-background/80 rounded-t-3xl backdrop-blur-xl">
       <div className="pb-4">
         <div className="flex flex-col gap-2 rounded-3xl border bg-background p-2 shadow-lg shadow-muted/40 focus-within:ring-1 focus-within:ring-ring">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                send();
-              }
-            }}
-            placeholder="Drop a rough prompt and I'll forge it into something sharper…"
-            className="max-h-40 min-h-10 resize-none border-none bg-transparent px-3 py-2 shadow-none focus-visible:ring-0 dark:bg-transparent"
-          />
+          <ChatInput onSend={send} />
+
           <div className="flex items-center gap-1.5 px-1 pb-1">
             <DropdownMenu>
               <Tooltip>
@@ -138,7 +160,7 @@ export function Composer() {
                 size="icon"
                 variant="secondary"
                 className="ml-auto size-8 shrink-0 rounded-full"
-                onClick={stop}
+                onClick={() => chat.stop()}
               >
                 <Square className="size-3.5 fill-current" />
               </Button>
@@ -146,7 +168,7 @@ export function Composer() {
               <Button
                 size="icon"
                 className="ml-auto size-8 shrink-0 rounded-full"
-                disabled={!input.trim()}
+                disabled={!hasInput}
                 onClick={send}
               >
                 <ArrowUp className="size-4" />

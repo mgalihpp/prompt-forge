@@ -1,31 +1,37 @@
 "use client";
 
+import { memo } from "react";
 import { MessageList } from "./message-list";
 import { Composer } from "./composer";
 import { useChat } from "@ai-sdk/react";
 import { chat } from "../chat-instance";
 
+const MemoMessageList = memo(MessageList);
+const MemoComposer = memo(Composer);
+
 export function Chat() {
   const { messages, status } = useChat({ chat });
   const isEmpty = messages.length === 0 && status !== "submitted";
 
+  if (isEmpty) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center bg-[radial-gradient(circle_at_top_left,hsl(var(--muted))_0,transparent_34rem)] px-4 sm:px-6">
+        <div className="flex w-full max-w-3xl flex-col gap-4">
+          <MemoMessageList />
+          <MemoComposer />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full w-full flex-col bg-[radial-gradient(circle_at_top_left,hsl(var(--muted))_0,transparent_34rem)]">
-      {isEmpty ? (
-        <div className="flex flex-1 flex-col items-center justify-center px-4 sm:px-6">
-          <div className="w-full max-w-3xl space-y-4">
-            <MessageList />
-            <Composer />
-          </div>
+      <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 sm:px-6">
+        <MemoMessageList />
+        <div className="sticky bottom-0 z-10 mt-auto">
+          <MemoComposer />
         </div>
-      ) : (
-        <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 sm:px-6">
-          <MessageList />
-          <div className="sticky bottom-0 z-10 mt-auto">
-            <Composer />
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
