@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { chat } from "../chat-instance";
 import { useForgyState } from "../hooks/use-forgy-state";
+import { collectText } from "./collect-text";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 import { TypingIndicator } from "./typing-indicator";
@@ -20,6 +21,8 @@ export function MessageList() {
     [messages, waiting],
   );
 
+  const isStreaming = status === "streaming";
+
   if (messages.length === 0 && !waiting) {
     return <EmptyState />;
   }
@@ -30,9 +33,11 @@ export function MessageList() {
         {messages.map((message) => (
           <MessageRow
             key={message.id}
-            message={message}
+            text={collectText(message, "text")}
+            reasoning={collectText(message, "reasoning")}
+            role={message.role}
             isLastAssistant={message.id === lastAssistantId}
-            streaming={status === "streaming"}
+            streaming={isStreaming}
             forgyState={forgyState}
           />
         ))}

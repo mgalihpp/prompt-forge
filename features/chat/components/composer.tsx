@@ -1,4 +1,4 @@
-import { memo, useCallback, useSyncExternalStore } from "react";
+import { memo, useCallback, useRef, useSyncExternalStore } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,11 +32,7 @@ function useChatStatus() {
   );
 }
 
-const ChatInput = memo(function ChatInput({
-  onSend,
-}: {
-  onSend: () => void;
-}) {
+const ChatInput = memo(function ChatInput({ onSend }: { onSend: () => void }) {
   const input = useChatStore((s) => s.input);
   const setInput = useChatStore((s) => s.setInput);
 
@@ -65,14 +61,16 @@ export function Composer() {
 
   const status = useChatStatus();
   const busy = status === "submitted" || status === "streaming";
+  const busyRef = useRef(false);
+  busyRef.current = busy;
 
   const send = useCallback(() => {
     const { input, opts, deepForge } = useChatStore.getState();
     const text = input.trim();
-    if (!text || busy) return;
+    if (!text || busyRef.current) return;
     chat.sendMessage({ text }, { body: { opts, deepForge } });
     useChatStore.setState({ input: "" });
-  }, [busy]);
+  }, []);
 
   return (
     <div className="shrink-0 bg-background/80 rounded-t-3xl backdrop-blur-xl">
