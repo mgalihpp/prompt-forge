@@ -1,14 +1,9 @@
-import type { CSSProperties } from "react"
+import type { CSSProperties } from "react";
 
-import { cn } from "@/lib/utils"
-import styles from "./forgy.module.css"
+import { cn } from "@/lib/utils";
+import styles from "./forgy.module.css";
 
-export type ForgyState =
-  | "idle"
-  | "busy"
-  | "thinking"
-  | "success"
-  | "error"
+export type ForgyState = "idle" | "busy" | "thinking" | "success" | "error";
 
 // Forgy, the Prompt Smith. A single self-contained SVG mascot whose
 // expression + animation are driven entirely by the `state` prop, mirroring
@@ -19,14 +14,19 @@ export function Forgy({
   waving = false,
   className,
 }: {
-  state?: ForgyState
+  state?: ForgyState;
   /** Play the one-shot wave gesture (only visible in the idle pose). */
-  waving?: boolean
-  className?: string
+  waving?: boolean;
+  className?: string;
 }) {
   return (
     <svg
-      className={cn(styles.root, styles[state], waving && styles.wave, className)}
+      className={cn(
+        styles.root,
+        styles[state],
+        waving && styles.wave,
+        className,
+      )}
       viewBox="0 0 200 220"
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -85,9 +85,33 @@ export function Forgy({
           strokeOpacity="0.7"
           strokeWidth="1"
         />
-        <line x1="132" y1="36" x2="178" y2="36" stroke="#6FE3FF" strokeWidth="1.4" opacity="0.85" />
-        <line x1="132" y1="44" x2="168" y2="44" stroke="#6FE3FF" strokeWidth="1.4" opacity="0.6" />
-        <line x1="132" y1="52" x2="172" y2="52" stroke="#6FE3FF" strokeWidth="1.4" opacity="0.75" />
+        <line
+          x1="132"
+          y1="36"
+          x2="178"
+          y2="36"
+          stroke="#6FE3FF"
+          strokeWidth="1.4"
+          opacity="0.85"
+        />
+        <line
+          x1="132"
+          y1="44"
+          x2="168"
+          y2="44"
+          stroke="#6FE3FF"
+          strokeWidth="1.4"
+          opacity="0.6"
+        />
+        <line
+          x1="132"
+          y1="52"
+          x2="172"
+          y2="52"
+          stroke="#6FE3FF"
+          strokeWidth="1.4"
+          opacity="0.75"
+        />
         <circle cx="140" cy="60" r="2.4" fill="#6FE3FF" />
         <circle cx="150" cy="60" r="2.4" fill="#6FE3FF" opacity="0.6" />
         <circle cx="160" cy="60" r="2.4" fill="#6FE3FF" opacity="0.4" />
@@ -120,15 +144,40 @@ export function Forgy({
         />
 
         {/* screen glare */}
-        <rect x="74" y="52" width="26" height="6" rx="3" fill="#ffffff" opacity="0.12" />
+        <rect
+          x="74"
+          y="52"
+          width="26"
+          height="6"
+          rx="3"
+          fill="#ffffff"
+          opacity="0.12"
+        />
 
         {/* visor / screen */}
-        <rect x="68" y="48" width="64" height="48" rx="14" fill="var(--panel)" />
+        <rect
+          x="68"
+          y="48"
+          width="64"
+          height="48"
+          rx="14"
+          fill="var(--panel)"
+        />
 
         {/* FACE: idle */}
         <g className={styles.faceIdle}>
-          <circle className={cn(styles.eye, styles.canBlink)} cx="88" cy="70" r="6" />
-          <circle className={cn(styles.eye, styles.canBlink)} cx="112" cy="70" r="6" />
+          <circle
+            className={cn(styles.eye, styles.canBlink)}
+            cx="88"
+            cy="70"
+            r="6"
+          />
+          <circle
+            className={cn(styles.eye, styles.canBlink)}
+            cx="112"
+            cy="70"
+            r="6"
+          />
         </g>
 
         {/* FACE: busy (focused, narrowed) */}
@@ -197,8 +246,20 @@ export function Forgy({
 
         {/* FACE: confused (asymmetric, worried) */}
         <g className={styles.faceConfused}>
-          <circle cx="88" cy="72" r="6" fill="var(--error)" filter="url(#eyeGlow)" />
-          <circle cx="112" cy="67" r="4.5" fill="var(--error)" filter="url(#eyeGlow)" />
+          <circle
+            cx="88"
+            cy="72"
+            r="6"
+            fill="var(--error)"
+            filter="url(#eyeGlow)"
+          />
+          <circle
+            cx="112"
+            cy="67"
+            r="4.5"
+            fill="var(--error)"
+            filter="url(#eyeGlow)"
+          />
           <path
             d="M81 58 q7 -4 12 -1"
             stroke="var(--metal-light)"
@@ -219,7 +280,15 @@ export function Forgy({
         />
 
         {/* panel line between screen and core */}
-        <rect x="78" y="102" width="44" height="6" rx="3" fill="#5C6478" opacity="0.3" />
+        <rect
+          x="78"
+          y="102"
+          width="44"
+          height="6"
+          rx="3"
+          fill="#5C6478"
+          opacity="0.3"
+        />
 
         {/* forge core */}
         <circle
@@ -231,7 +300,14 @@ export function Forgy({
           filter="url(#softGlow)"
           opacity="0.6"
         />
-        <circle className={styles.core} cx="100" cy="124" r="13" stroke="#20232C" strokeWidth="2" />
+        <circle
+          className={styles.core}
+          cx="100"
+          cy="124"
+          r="13"
+          stroke="#20232C"
+          strokeWidth="2"
+        />
         <circle cx="100" cy="124" r="5.2" fill="#e0f2fe" opacity="0.85" />
 
         {/* left arm (static nub) */}
@@ -246,17 +322,56 @@ export function Forgy({
             stroke="#20232C"
             strokeWidth="2"
           />
-          <circle cx="51" cy="116" r="7" fill="url(#metalGrad)" stroke="#20232C" strokeWidth="1.6" />
+          <circle
+            cx="51"
+            cy="116"
+            r="7"
+            fill="url(#metalGrad)"
+            stroke="#20232C"
+            strokeWidth="1.6"
+          />
         </g>
 
         {/* legs / feet */}
-        <rect x="76" y="150" width="19" height="15" rx="6" fill="#2E3342" stroke="#20232C" strokeWidth="1.6" />
-        <rect x="105" y="150" width="19" height="15" rx="6" fill="#2E3342" stroke="#20232C" strokeWidth="1.6" />
+        <rect
+          x="76"
+          y="150"
+          width="19"
+          height="15"
+          rx="6"
+          fill="#2E3342"
+          stroke="#20232C"
+          strokeWidth="1.6"
+        />
+        <rect
+          x="105"
+          y="150"
+          width="19"
+          height="15"
+          rx="6"
+          fill="#2E3342"
+          stroke="#20232C"
+          strokeWidth="1.6"
+        />
 
         {/* ANVIL + SPARKS (busy) — drawn after the legs so it sits in front */}
         <g className={styles.anvilGroup}>
-          <path d="M88,161 h40 v6 h-7 v10 h-26 v-10 h-7 z" fill="#282C38" stroke="#4A5268" strokeWidth="1.5" />
-          <rect x="84" y="151" width="64" height="11" rx="2.5" fill="url(#metalGrad)" stroke="#4A5268" strokeWidth="1.2" />
+          <path
+            d="M88,161 h40 v6 h-7 v10 h-26 v-10 h-7 z"
+            fill="#282C38"
+            stroke="#4A5268"
+            strokeWidth="1.5"
+          />
+          <rect
+            x="84"
+            y="151"
+            width="64"
+            height="11"
+            rx="2.5"
+            fill="url(#metalGrad)"
+            stroke="#4A5268"
+            strokeWidth="1.2"
+          />
         </g>
         <g className={styles.sparksGroup}>
           <polygon
@@ -298,7 +413,16 @@ export function Forgy({
             stroke="#20232C"
             strokeWidth="2"
           />
-          <rect x="144" y="108" width="8" height="28" rx="3" fill="#3B3F4C" stroke="#20232C" strokeWidth="1.4" />
+          <rect
+            x="144"
+            y="108"
+            width="8"
+            height="28"
+            rx="3"
+            fill="#3B3F4C"
+            stroke="#20232C"
+            strokeWidth="1.4"
+          />
           {/* plain hand (default state) */}
           <circle
             className={styles.handCap}
@@ -311,7 +435,16 @@ export function Forgy({
           />
           {/* hammer head (busy state only) */}
           <g className={styles.hammerHead}>
-            <rect x="131" y="134" width="28" height="17" rx="4" fill="url(#metalGrad)" stroke="#20232C" strokeWidth="1.6" />
+            <rect
+              x="131"
+              y="134"
+              width="28"
+              height="17"
+              rx="4"
+              fill="url(#metalGrad)"
+              stroke="#20232C"
+              strokeWidth="1.6"
+            />
           </g>
         </g>
 
@@ -331,5 +464,5 @@ export function Forgy({
         </g>
       </g>
     </svg>
-  )
+  );
 }

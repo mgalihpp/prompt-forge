@@ -50,7 +50,12 @@ export function ForgyMascot({
     });
   }, []);
 
-  // Idle greeting: an opening wave after mount, then every ~7s while idle.
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (!autoWave || state !== "idle") return;
     const hello = setTimeout(wave, 600);
@@ -60,14 +65,6 @@ export function ForgyMascot({
       clearInterval(loop);
     };
   }, [autoWave, state, wave]);
-
-  // Drop the pending reset timer on unmount.
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
 
   return (
     <Tooltip>

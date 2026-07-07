@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useTheme } from "next-themes"
-import { Monitor, Moon, Sun } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useTheme } from "next-themes";
+import { Monitor, Moon, Sun } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const THEMES = [
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
   { value: "system", label: "System", icon: Monitor },
-]
+];
 
 export default function AppearanceSettingsPage() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="flex flex-col gap-6">
@@ -40,5 +40,5 @@ export default function AppearanceSettingsPage() {
         ))}
       </div>
     </div>
-  )
+  );
 }

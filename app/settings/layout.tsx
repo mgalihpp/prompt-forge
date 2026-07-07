@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { ChevronLeft, CreditCard, Palette, Settings } from "lucide-react"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ChevronLeft, CreditCard, Palette, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const NAV = [
   {
@@ -19,14 +19,14 @@ const NAV = [
       { href: "/settings/billing", label: "Billing & plan", icon: CreditCard },
     ],
   },
-]
+];
 
 export default function SettingsLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <div className="flex h-svh overflow-hidden">
@@ -68,5 +68,5 @@ export default function SettingsLayout({
         <div className="mx-auto w-full max-w-3xl px-8 py-10">{children}</div>
       </main>
     </div>
-  )
+  );
 }
