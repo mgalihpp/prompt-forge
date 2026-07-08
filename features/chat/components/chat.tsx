@@ -1,10 +1,10 @@
 "use client";
 
-import { memo } from "react";
-import { MessageList } from "./message-list";
-import { Composer } from "./composer";
 import { useChat } from "@ai-sdk/react";
+import { memo } from "react";
 import { chat } from "../chat-instance";
+import { Composer } from "./composer";
+import { MessageList } from "./message-list";
 
 const MemoMessageList = memo(MessageList);
 const MemoComposer = memo(Composer);

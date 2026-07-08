@@ -1,10 +1,10 @@
 import {
-  Wand2,
-  UserRound,
-  Palette,
   FileText,
-  Target,
   type LucideIcon,
+  Palette,
+  Target,
+  UserRound,
+  Wand2,
 } from "lucide-react";
 
 export const OPTIONS: Record<

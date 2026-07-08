@@ -1,3 +1,4 @@
+import { forgeRouter } from "./routers/forge";
 import { projectRouter } from "./routers/project";
 import { userRouter } from "./routers/user";
 
@@ -5,6 +6,7 @@ import { userRouter } from "./routers/user";
 export const router = {
   user: userRouter,
   project: projectRouter,
+  forge: forgeRouter,
 };
 
 export type AppRouter = typeof router;

@@ -1,6 +1,5 @@
-import { memo } from "react";
 import { Check, ChevronRight, Copy } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/ui/markdown";
 import { cn } from "@/lib/utils";
