@@ -9,7 +9,14 @@ type ChatState = {
   opts: Record<string, string>;
   setInput: (input: string) => void;
   setOption: (key: string, value: string) => void;
+  setOptions: (opts: Record<string, string>) => void;
+  setDeepForge: (on: boolean) => void;
   toggleDeepForge: () => void;
+  applyPreset: (p: {
+    ore: string;
+    opts: Record<string, string>;
+    deepForge?: boolean;
+  }) => void;
 };
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -20,5 +27,13 @@ export const useChatStore = create<ChatState>((set) => ({
   setInput: (input) => set({ input }),
   setOption: (key, value) =>
     set((s) => ({ opts: { ...s.opts, [key]: value } })),
+  setOptions: (opts) => set((s) => ({ opts: { ...s.opts, ...opts } })),
+  setDeepForge: (on) => set({ deepForge: on }),
   toggleDeepForge: () => set((s) => ({ deepForge: !s.deepForge })),
+  applyPreset: (p) =>
+    set((s) => ({
+      input: p.ore,
+      opts: { ...s.opts, ...p.opts },
+      deepForge: p.deepForge ?? s.deepForge,
+    })),
 }));

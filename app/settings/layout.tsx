@@ -1,8 +1,8 @@
 "use client";
 
+import { ChevronLeft, CreditCard, Palette, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, CreditCard, Palette, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [

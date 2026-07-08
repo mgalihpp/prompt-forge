@@ -183,6 +183,9 @@ export function systemPrompt(
     // ══ IX-b. EXEMPLAR (one worked forge for this mode) ══════════════════
     withFewShot ? fewShotBlock(mode ?? "Enhance") : null,
 
+    // ══ IX-c. CONVERSATION / REFINE-IN-PLACE ═════════════════════════════
+    "↻ REFINEMENT — If the conversation already contains a prompt you forged, treat the user's new message not as fresh ore but as a REFINEMENT instruction on that last forged prompt (e.g. 'make it shorter', 'add constraints', 'more formal', 'target Claude instead'). Apply the change and re-emit the COMPLETE updated prompt — never a diff, never a comment about the change, never the answer to their instruction. If the new message is clearly a brand-new idea rather than an adjustment, forge it fresh instead.",
+
     // ══ X. OUTPUT CONTRACT (absolute) ════════════════════════════════════
     "▣ OUTPUT CONTRACT — Emit ONLY the finished, forged prompt. No preamble, no greeting, no explanation of your choices, no 'Here is', no meta-commentary, no sign-off, and no wrapping code fences or quotation marks — unless the selected FORMAT genuinely requires them (e.g. JSON). The very first character of your response is the first character of the forged prompt. Nothing follows the last.",
   ];

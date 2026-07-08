@@ -1,11 +1,6 @@
+import { ArrowUp, Hammer, SlidersHorizontal, Square } from "lucide-react";
 import { memo, useCallback, useRef, useSyncExternalStore } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,10 +11,15 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUp, SlidersHorizontal, Hammer, Square } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { OPTIONS } from "../constants";
 import { chat } from "../chat-instance";
+import { OPTIONS } from "../constants";
 import { useChatStore } from "../store";
 
 function useChatStatus() {
