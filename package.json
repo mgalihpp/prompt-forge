@@ -10,6 +10,7 @@
     "format": "biome format --write",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
+    "eval": "bun run eval/run.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

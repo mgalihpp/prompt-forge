@@ -96,7 +96,7 @@ export default async function ChatLayout({
               <span className="font-semibold text-foreground">0</span> / 10
               prompts used today
             </p>
-            <Button size="sm" className="w-full">
+            <Button variant="glossy" className="w-full">
               Upgrade to Pro
             </Button>
           </div>
