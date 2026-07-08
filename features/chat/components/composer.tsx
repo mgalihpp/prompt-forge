@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ArrowUp, SlidersHorizontal, Hammer, Square } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { OPTIONS } from "../constants";
 import { chat } from "../chat-instance";
 import { useChatStore } from "../store";
@@ -136,13 +137,14 @@ export function Composer() {
                 render={
                   <Button
                     type="button"
-                    variant={deepForge ? "default" : "ghost"}
+                    variant={deepForge ? "glossy" : "ghost"}
                     size={deepForge ? "sm" : "icon"}
-                    className={
+                    className={cn(
+                      "transition-[background-color,box-shadow,color,filter] duration-200 ease-out",
                       deepForge
                         ? "h-8 gap-1.5 rounded-full text-xs"
-                        : "size-8 rounded-full"
-                    }
+                        : "size-8 rounded-full",
+                    )}
                     onClick={toggleDeepForge}
                   />
                 }
@@ -156,7 +158,7 @@ export function Composer() {
             {busy ? (
               <Button
                 size="icon"
-                variant="secondary"
+                variant="glossy"
                 className="ml-auto size-8 shrink-0 rounded-full"
                 onClick={() => chat.stop()}
               >
@@ -165,6 +167,7 @@ export function Composer() {
             ) : (
               <Button
                 size="icon"
+                variant="glossy"
                 className="ml-auto size-8 shrink-0 rounded-full"
                 disabled={!hasInput}
                 onClick={send}
