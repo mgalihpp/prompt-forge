@@ -1,10 +1,11 @@
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ForgyMascot } from "./forgy-mascot";
 
 export function ErrorNotice({ onRetry }: { onRetry: () => void }) {
   return (
     <div>
-      <div className="mx-auto flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+      <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
         <span>Something went wrong.</span>
         <Button
           size="sm"
@@ -16,6 +17,7 @@ export function ErrorNotice({ onRetry }: { onRetry: () => void }) {
           Retry
         </Button>
       </div>
+      <ForgyMascot state="error" className="my-4 size-12" />
     </div>
   );
 }

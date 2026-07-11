@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# eval harness output
+/eval/reports
+
 # next.js
 /.next/
 /out/

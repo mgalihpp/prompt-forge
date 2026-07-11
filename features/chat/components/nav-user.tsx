@@ -1,7 +1,6 @@
 "use client";
 
 import { useClerk, useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import {
   ChevronsUpDown,
   CreditCard,
@@ -9,6 +8,7 @@ import {
   Palette,
   Settings,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,

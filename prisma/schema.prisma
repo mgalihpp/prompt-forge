@@ -27,3 +27,19 @@ model Project {
 
   @@index([clerkId])
 }
+
+model ForgedPrompt {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String // owner (Clerk user id)
+  title     String // short label, derived from the ore
+  ore       String // the user's raw input
+  blade     String // the forged prompt
+  opts      Json // the knob values used (mode/persona/tone/format/target)
+  deepForge Boolean  @default(false)
+  favorite  Boolean  @default(false)
+  shareId   String?  @unique // set when publicly shared
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clerkId])
+}

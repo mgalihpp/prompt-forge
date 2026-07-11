@@ -1,4 +1,14 @@
+import {
+  FolderOpen,
+  Hammer,
+  LayoutTemplate,
+  Plus,
+  Search,
+  Settings2,
+} from "lucide-react";
 import { cookies } from "next/headers";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -13,16 +23,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { NavUser } from "@/features/chat/components/nav-user";
-import {
-  FolderOpen,
-  Hammer,
-  LayoutTemplate,
-  Plus,
-  Search,
-  Settings2,
-} from "lucide-react";
 
 export default async function ChatLayout({
   children,
@@ -72,12 +73,18 @@ export default async function ChatLayout({
             <SidebarGroupLabel>Library</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Collection">
-                  <FolderOpen /> <span>Collection</span>
+                <SidebarMenuButton
+                  tooltip="My Forges"
+                  render={<Link href="/forges" />}
+                >
+                  <FolderOpen /> <span>My Forges</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Templates">
+                <SidebarMenuButton
+                  tooltip="New chat"
+                  render={<Link href="/chat" />}
+                >
                   <LayoutTemplate /> <span>Templates</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -96,7 +103,7 @@ export default async function ChatLayout({
               <span className="font-semibold text-foreground">0</span> / 10
               prompts used today
             </p>
-            <Button size="sm" className="w-full">
+            <Button variant="glossy" className="w-full">
               Upgrade to Pro
             </Button>
           </div>

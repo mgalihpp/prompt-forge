@@ -1,9 +1,9 @@
 import "@/lib/orpc/server"; // sets globalThis.$client for SSR/pre-render
 import { ClerkProvider } from "@clerk/nextjs";
-import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
-import { Providers } from "./providers";
 import { Agentation } from "agentation";
+import type { Metadata } from "next";
+import { Geist_Mono, Inter } from "next/font/google";
+import { Providers } from "./providers";
 import "./globals.css";
 
 const geistSans = Inter({
