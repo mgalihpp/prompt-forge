@@ -74,8 +74,8 @@ export default async function ChatLayout({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  tooltip="New chat"
-                  render={<Link href="/chat" />}
+                  tooltip="Templates"
+                  render={<Link href="/templates" />}
                 >
                   <LayoutTemplate /> <span>Templates</span>
                 </SidebarMenuButton>
