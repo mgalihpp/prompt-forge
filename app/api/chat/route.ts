@@ -11,7 +11,7 @@ import {
 import { chatModel } from "@/lib/ai";
 import { reflectSystemPrompt, systemPrompt } from "@/lib/forge-prompt";
 import { prisma } from "@/lib/prisma";
-import { LIMIT_MESSAGE, trySpendPrompt } from "@/lib/usage";
+import { checkUsage, LIMIT_MESSAGE, trySpendPrompt } from "@/lib/usage";
 
 export const maxDuration = 60;
 
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return new Response("Unauthorized", { status: 401 });
 
-  if (!(await trySpendPrompt(userId))) {
+  if (!(await checkUsage(userId))) {
     return new Response(LIMIT_MESSAGE, { status: 429 });
   }
 
@@ -87,11 +87,12 @@ export async function POST(req: Request) {
   const modelMessages = await convertToModelMessages(messages);
   const userText = textOf(messages.at(-1));
 
-  const onFinish = ({ text }: { text: string }) => {
+  const onFinish = async ({ text }: { text: string }) => {
     if (!threadId || !text) return;
-    return persistExchange(userId, threadId, userText, text).catch(() => {
-      // Persistence is best-effort; never break the stream over it.
-    });
+    await Promise.all([
+      trySpendPrompt(userId).catch(() => {}),
+      persistExchange(userId, threadId, userText, text).catch(() => {}),
+    ]);
   };
 
   // Standard heat: one streamed forge. Fast path, streaming UX preserved.

@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { memo } from "react";
 import { chat } from "../chat-instance";
+import { useInvalidateUsageOnChat } from "../hooks/use-invalidate-usage";
 import { Composer } from "./composer";
 import { MessageList } from "./message-list";
 
@@ -10,6 +11,8 @@ const MemoMessageList = memo(MessageList);
 const MemoComposer = memo(Composer);
 
 export function Chat() {
+  useInvalidateUsageOnChat();
+
   const { messages, status } = useChat({ chat });
   const isEmpty = messages.length === 0 && status !== "submitted";
 

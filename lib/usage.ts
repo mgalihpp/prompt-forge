@@ -16,6 +16,14 @@ export async function getUsage(clerkId: string) {
   return { used: row?.count ?? 0, limit: FREE_DAILY_LIMIT };
 }
 
+/** Read-only check: does this user have budget for one more prompt today? */
+export async function checkUsage(clerkId: string): Promise<boolean> {
+  const row = await prisma.dailyUsage.findUnique({
+    where: { clerkId_day: { clerkId, day: utcDay() } },
+  });
+  return (row?.count ?? 0) < FREE_DAILY_LIMIT;
+}
+
 /**
  * Spend one prompt from today's quota. Atomic upsert-increment, so parallel
  * requests can't double-spend. Returns false when the user is at the limit —
