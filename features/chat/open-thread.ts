@@ -1,4 +1,4 @@
-import type { UIMessage } from "ai";
+import type { ForgeUIMessage } from "@/lib/deep-forge";
 import { client } from "@/lib/orpc/client";
 import { chat } from "./chat-instance";
 import { useChatStore } from "./store";
@@ -10,13 +10,19 @@ import { useChatStore } from "./store";
 export async function openThread(threadId: string) {
   const thread = await client.history.messages({ threadId });
 
-  chat.messages = thread.messages.map(
-    (m): UIMessage => ({
+  chat.messages = thread.messages.map((m): ForgeUIMessage => {
+    // Deep-forge turns persisted their structured parts (variants + review);
+    // plain turns rehydrate from the flat text as before.
+    const parts = m.parts as ForgeUIMessage["parts"] | null;
+    return {
       id: m.id,
       role: m.role as "user" | "assistant",
-      parts: [{ type: "text", text: m.text }],
-    }),
-  );
+      parts:
+        Array.isArray(parts) && parts.length
+          ? parts
+          : [{ type: "text", text: m.text }],
+    };
+  });
   useChatStore.getState().setThreadId(thread.id);
 }
 

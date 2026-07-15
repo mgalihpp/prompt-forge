@@ -3,6 +3,10 @@
  *
  *   bun run eval                 # standard forge, few-shot ON (production default)
  *   bun run eval --deep          # Deep Forge (draft → reflect) path
+ *                                # TODO: production Deep Forge now runs the A/B/C
+ *                                # variants pipeline (app/api/chat/route.ts);
+ *                                # --deep still evaluates the old draft→reflect
+ *                                # forger and no longer mirrors production.
  *   bun run eval --no-fewshot    # ablate the exemplar block (A/B its value)
  *   bun run eval --filter enh    # only run cases whose id includes "enh"
  *   bun run eval --limit 3       # first N cases (quick smoke test)

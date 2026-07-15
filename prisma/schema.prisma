@@ -45,6 +45,7 @@ model ChatMessage {
   clerkId   String // denormalized owner — search/delete filter without a join
   role      String // "user" | "assistant"
   text      String
+  parts     Json? // structured UIMessage parts (deep-forge variants); null for plain turns
   createdAt DateTime   @default(now())
   thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
