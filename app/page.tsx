@@ -1,4 +1,5 @@
 import { Hero } from "@/components/hero";
+import { Pricing } from "@/components/pricing";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -15,6 +16,7 @@ export default function Home() {
     >
       <SiteHeader />
       <Hero />
+      <Pricing />
       <SiteFooter />
     </div>
   );
