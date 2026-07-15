@@ -7,7 +7,11 @@ type ChatState = {
   input: string;
   deepForge: boolean;
   opts: Record<string, string>;
+  // Persistence target. null = new conversation; the composer creates a
+  // thread lazily on first send and every /api/chat call carries this id.
+  threadId: string | null;
   setInput: (input: string) => void;
+  setThreadId: (threadId: string | null) => void;
   setOption: (key: string, value: string) => void;
   setOptions: (opts: Record<string, string>) => void;
   setDeepForge: (on: boolean) => void;
@@ -23,8 +27,10 @@ export const useChatStore = create<ChatState>((set) => ({
   input: "",
   deepForge: false,
   opts: defaultOptions(),
+  threadId: null,
 
   setInput: (input) => set({ input }),
+  setThreadId: (threadId) => set({ threadId }),
   setOption: (key, value) =>
     set((s) => ({ opts: { ...s.opts, [key]: value } })),
   setOptions: (opts) => set((s) => ({ opts: { ...s.opts, ...opts } })),

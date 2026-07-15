@@ -1,11 +1,4 @@
-import {
-  FolderOpen,
-  Hammer,
-  LayoutTemplate,
-  Plus,
-  Search,
-  Settings2,
-} from "lucide-react";
+import { FolderOpen, Hammer, LayoutTemplate, Settings2 } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -23,7 +16,10 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { HistoryGroup } from "@/features/chat/components/history-group";
+import { HistorySearch } from "@/features/chat/components/history-search";
 import { NavUser } from "@/features/chat/components/nav-user";
+import { NewChatButton } from "@/features/chat/components/new-chat-button";
 
 export default async function ChatLayout({
   children,
@@ -58,14 +54,10 @@ export default async function ChatLayout({
           <SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="New chat">
-                  <Plus /> <span>New chat</span>
-                </SidebarMenuButton>
+                <NewChatButton />
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Search">
-                  <Search /> <span>Search</span>
-                </SidebarMenuButton>
+                <HistorySearch />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
@@ -90,11 +82,8 @@ export default async function ChatLayout({
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
-          {/* Separate group in the nav flow — chat history list renders here */}
-          <SidebarGroup>
-            <SidebarGroupLabel>History</SidebarGroupLabel>
-            <SidebarMenu>{/* chat history items */}</SidebarMenu>
-          </SidebarGroup>
+          {/* Chat history: date-grouped thread list */}
+          <HistoryGroup />
         </SidebarContent>
         <SidebarFooter>
           <div className="flex flex-col gap-3 rounded-xl border p-3 group-data-[collapsible=icon]:hidden">

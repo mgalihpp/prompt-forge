@@ -17,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCreateThread } from "@/lib/hooks/use-history";
 import { cn } from "@/lib/utils";
 import { chat } from "../chat-instance";
 import { OPTIONS } from "../constants";
@@ -65,13 +66,29 @@ export function Composer() {
   const busyRef = useRef(false);
   busyRef.current = busy;
 
-  const send = useCallback(() => {
-    const { input, opts, deepForge } = useChatStore.getState();
+  // mutateAsync is referentially stable, so `send` stays stable for ChatInput
+  const { mutateAsync: createThread } = useCreateThread();
+
+  const send = useCallback(async () => {
+    const { input, opts, deepForge, threadId } = useChatStore.getState();
     const text = input.trim();
     if (!text || busyRef.current) return;
-    chat.sendMessage({ text }, { body: { opts, deepForge } });
+
+    // Lazily create the history thread on the first message. If it fails,
+    // the chat still works — the exchange just isn't persisted.
+    let tid = threadId;
+    if (!tid) {
+      tid = await createThread({
+        title: text.replace(/\s+/g, " ").slice(0, 80),
+      })
+        .then((t) => t.id)
+        .catch(() => null);
+      if (tid) useChatStore.setState({ threadId: tid });
+    }
+
+    chat.sendMessage({ text }, { body: { opts, deepForge, threadId: tid } });
     useChatStore.setState({ input: "" });
-  }, []);
+  }, [createThread]);
 
   return (
     <div className="shrink-0 bg-background/80 rounded-t-3xl backdrop-blur-xl">
