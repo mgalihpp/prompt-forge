@@ -1,57 +1,60 @@
 /**
- * Minimal word-level diff (LCS-based) for the ore → blade comparison view.
- * Dependency-free; good enough to highlight what the forge added/removed.
+ * Word-level diff for the ore → blade comparison view, backed by jsdiff's
+ * `diffWords`. Unlike the old hand-rolled LCS (which tokenized whitespace and
+ * often mis-aligned on spaces instead of words), jsdiff ignores whitespace
+ * when matching but preserves it in the output, so identical words never get
+ * flagged as changed just because spacing shifted.
  */
+import { diffWords } from "diff";
+
 export type DiffPart = { type: "same" | "add" | "del"; value: string };
 
-function tokenize(s: string): string[] {
-  // Keep whitespace as its own tokens so we can rejoin faithfully.
-  return s.split(/(\s+)/).filter((t) => t.length > 0);
-}
+// Intl.Segmenter gives proper word boundaries (punctuation, CJK, etc.) when
+// the runtime supports it; jsdiff falls back to its regex tokenizer otherwise.
+const intlSegmenter =
+  typeof Intl !== "undefined" && "Segmenter" in Intl
+    ? new Intl.Segmenter(undefined, { granularity: "word" })
+    : undefined;
 
 export function wordDiff(before: string, after: string): DiffPart[] {
-  const a = tokenize(before);
-  const b = tokenize(after);
-  const n = a.length;
-  const m = b.length;
+  const changes = diffWords(before, after, {
+    intlSegmenter,
+    // Bail out on pathological inputs instead of freezing the UI.
+    timeout: 1000,
+  });
 
-  // LCS length table.
-  const dp: number[][] = Array.from({ length: n + 1 }, () =>
-    new Array(m + 1).fill(0),
-  );
-  for (let i = n - 1; i >= 0; i--) {
-    for (let j = m - 1; j >= 0; j--) {
-      dp[i][j] =
-        a[i] === b[j]
-          ? dp[i + 1][j + 1] + 1
-          : Math.max(dp[i + 1][j], dp[i][j + 1]);
-    }
+  // jsdiff returns undefined when the timeout is hit — degrade to a whole-text
+  // replace so the view still renders something sensible.
+  if (!changes) {
+    const parts: DiffPart[] = [];
+    if (before) parts.push({ type: "del", value: before });
+    if (before && after) parts.push({ type: "same", value: "\n" });
+    if (after) parts.push({ type: "add", value: after });
+    return parts;
   }
 
   const parts: DiffPart[] = [];
-  const push = (type: DiffPart["type"], value: string) => {
+  for (const c of changes) {
+    if (!c.value) continue;
+    const type: DiffPart["type"] = c.added ? "add" : c.removed ? "del" : "same";
     const last = parts[parts.length - 1];
-    if (last && last.type === type) last.value += value;
-    else parts.push({ type, value });
-  };
-
-  let i = 0;
-  let j = 0;
-  while (i < n && j < m) {
-    if (a[i] === b[j]) {
-      push("same", a[i]);
-      i++;
-      j++;
-    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
-      push("del", a[i]);
-      i++;
-    } else {
-      push("add", b[j]);
-      j++;
-    }
+    if (last && last.type === type) last.value += c.value;
+    else parts.push({ type, value: c.value });
   }
-  while (i < n) push("del", a[i++]);
-  while (j < m) push("add", b[j++]);
-
   return parts;
+}
+
+/** Word counts for the diff summary chips (whitespace-only parts excluded). */
+export function diffStats(parts: DiffPart[]): {
+  added: number;
+  removed: number;
+} {
+  let added = 0;
+  let removed = 0;
+  for (const p of parts) {
+    const words = p.value.trim() ? p.value.trim().split(/\s+/).length : 0;
+    if (p.type === "add") added += words;
+    else if (p.type === "del") removed += words;
+  }
+  return { added, removed };
 }

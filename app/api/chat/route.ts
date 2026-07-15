@@ -156,7 +156,6 @@ export async function POST(req: Request) {
   const modelMessages = await convertToModelMessages(canonicalize(messages));
   const userText = textOf(messages.at(-1));
 
-
   // Standard heat: one streamed forge. Fast path, streaming UX preserved.
   if (!deepForge) {
     const result = streamText({
