@@ -74,7 +74,9 @@ function ThreadItem({ thread }: { thread: Thread }) {
         tooltip={thread.title}
       >
         <div className="flex min-w-0 flex-col items-start">
-          <span className="w-full truncate text-sm">{thread.title}</span>
+          <span className="w-full truncate text-sm text-sidebar-foreground/70 transition-colors group-hover/menu-button:text-sidebar-accent-foreground group-data-active/menu-button:text-sidebar-accent-foreground">
+            {thread.title}
+          </span>
           <span className="w-full truncate text-xs text-muted-foreground">
             {format(new Date(thread.updatedAt), "d MMM, HH:mm")}
           </span>

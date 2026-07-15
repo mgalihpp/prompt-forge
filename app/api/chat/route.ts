@@ -11,6 +11,7 @@ import {
 import { chatModel } from "@/lib/ai";
 import { reflectSystemPrompt, systemPrompt } from "@/lib/forge-prompt";
 import { prisma } from "@/lib/prisma";
+import { LIMIT_MESSAGE, trySpendPrompt } from "@/lib/usage";
 
 export const maxDuration = 60;
 
@@ -75,6 +76,10 @@ async function persistExchange(
 export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return new Response("Unauthorized", { status: 401 });
+
+  if (!(await trySpendPrompt(userId))) {
+    return new Response(LIMIT_MESSAGE, { status: 429 });
+  }
 
   const { messages, opts, deepForge, threadId }: Body = await req.json();
 

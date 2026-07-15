@@ -67,3 +67,12 @@ model ForgedPrompt {
 
   @@index([clerkId])
 }
+
+model DailyUsage {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId String
+  day     String // UTC calendar day, "YYYY-MM-DD" — reset is implicit via the key
+  count   Int    @default(0)
+
+  @@unique([clerkId, day])
+}

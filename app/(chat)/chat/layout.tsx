@@ -1,7 +1,6 @@
 import { FolderOpen, Hammer, LayoutTemplate, Settings2 } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +19,7 @@ import { HistoryGroup } from "@/features/chat/components/history-group";
 import { HistorySearch } from "@/features/chat/components/history-search";
 import { NavUser } from "@/features/chat/components/nav-user";
 import { NewChatButton } from "@/features/chat/components/new-chat-button";
+import { UsageCard } from "@/features/chat/components/usage-card";
 
 export default async function ChatLayout({
   children,
@@ -86,16 +86,7 @@ export default async function ChatLayout({
           <HistoryGroup />
         </SidebarContent>
         <SidebarFooter>
-          <div className="flex flex-col gap-3 rounded-xl border p-3 group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-semibold">Free Plan</span>
-            <p className="text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground">0</span> / 10
-              prompts used today
-            </p>
-            <Button variant="glossy" className="w-full">
-              Upgrade to Pro
-            </Button>
-          </div>
+          <UsageCard />
           <SidebarMenu>
             <SidebarMenuItem>
               <NavUser />

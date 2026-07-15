@@ -2,8 +2,12 @@ import { currentUser } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { authed, base } from "@/lib/orpc/base";
 import { prisma } from "@/lib/prisma";
+import { getUsage } from "@/lib/usage";
 
 export const userRouter = {
+  // Today's prompt quota — read by the billing page and the composer
+  usage: authed.handler(({ context }) => getUsage(context.userId)),
+
   // Upserts the DB user from Clerk on read, so the profile stays in sync
   me: authed.handler(async ({ context }) => {
     const cu = await currentUser();

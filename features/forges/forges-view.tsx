@@ -99,7 +99,12 @@ export function ForgesView() {
           </EmptyDescription>
         </EmptyHeader>
         {!filter && (
-          <Button variant="glossy" size="sm" render={<Link href="/chat" />}>
+          <Button
+            variant="glossy"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/chat" />}
+          >
             Start forging
           </Button>
         )}

@@ -103,7 +103,7 @@ export function MessageList() {
         })}
 
         {waiting && <TypingIndicator />}
-        {error && <ErrorNotice onRetry={() => regenerate()} />}
+        {error && <ErrorNotice error={error} onRetry={() => regenerate()} />}
       </div>
 
       <AlertDialog
