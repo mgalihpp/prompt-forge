@@ -152,8 +152,6 @@ function ThreadItem({ thread }: { thread: Thread }) {
 export function HistoryGroup() {
   const { data: threads = [], isPending } = useThreads();
 
-  // Cold cache (no SSR hydration, e.g. client-side nav): show placeholder rows
-  // instead of an empty sidebar so the list doesn't pop in.
   if (isPending) {
     return (
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">

@@ -32,8 +32,6 @@ export default async function ChatLayout({
   // Restore left sidebar state from cookie so SSR matches client (no flash).
   const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false";
 
-  // Prefetch on the server via the direct SSR client (no HTTP), then hydrate
-  // so the sidebar (history + usage) is populated on first paint.
   const queryClient = getQueryClient();
   await Promise.all([
     queryClient.prefetchQuery(orpc.history.threads.queryOptions()),

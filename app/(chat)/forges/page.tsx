@@ -1,7 +1,13 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ForgesView } from "@/features/forges/forges-view";
+import { orpc } from "@/lib/orpc/client";
+import { getQueryClient } from "@/lib/query-client.server";
 
-export default function ForgesPage() {
+export default async function ForgesPage() {
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery(orpc.forge.list.queryOptions());
+
   return (
     <div className="flex w-full flex-1 flex-col">
       <div className="mb-8">
@@ -13,7 +19,9 @@ export default function ForgesPage() {
         </p>
       </div>
       <Suspense>
-        <ForgesView />
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <ForgesView />
+        </HydrationBoundary>
       </Suspense>
     </div>
   );
