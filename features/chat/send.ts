@@ -31,7 +31,12 @@ export function useSendText() {
         })
           .then((t) => t.id)
           .catch(() => null);
-        if (tid) useChatStore.setState({ threadId: tid });
+        if (tid) {
+          useChatStore.setState({ threadId: tid });
+          // Shallow URL update — a router navigation would remount the page
+          // and reload persisted messages over the stream about to start.
+          window.history.replaceState(null, "", `/chat/${tid}`);
+        }
       }
 
       chat.sendMessage({ text }, { body: { opts, deepForge, threadId: tid } });

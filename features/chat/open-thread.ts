@@ -1,15 +1,15 @@
 import type { ForgeUIMessage } from "@/lib/deep-forge";
-import { client } from "@/lib/orpc/client";
+import type { client } from "@/lib/orpc/client";
 import { chat } from "./chat-instance";
 import { useChatStore } from "./store";
+
+type ThreadWithMessages = Awaited<ReturnType<typeof client.history.messages>>;
 
 /**
  * Load a past conversation into the singleton Chat instance so the existing
  * chat surface renders it, and point the composer's persistence at it.
  */
-export async function openThread(threadId: string) {
-  const thread = await client.history.messages({ threadId });
-
+export function loadThread(thread: ThreadWithMessages) {
   chat.messages = thread.messages.map((m): ForgeUIMessage => {
     // Deep-forge turns persisted their structured parts (variants + review);
     // plain turns rehydrate from the flat text as before.

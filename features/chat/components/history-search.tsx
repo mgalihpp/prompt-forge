@@ -2,8 +2,8 @@
 
 import { format } from "date-fns";
 import { MessageSquare, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import {
   Command,
   CommandDialog,
@@ -16,9 +16,9 @@ import {
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { useSearchHistory, useThreads } from "@/lib/hooks/use-history";
-import { openThread } from "../open-thread";
 
 export function HistorySearch() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const { data: threads } = useThreads();
@@ -41,7 +41,7 @@ export function HistorySearch() {
   const select = (threadId: string) => {
     setOpen(false);
     setQ("");
-    openThread(threadId).catch(() => toast.error("Couldn't load conversation"));
+    router.push(`/chat/${threadId}`);
   };
 
   return (

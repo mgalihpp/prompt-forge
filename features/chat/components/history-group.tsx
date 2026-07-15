@@ -2,6 +2,8 @@
 
 import { format, isToday, isYesterday } from "date-fns";
 import { Download, MoreHorizontal, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -31,7 +33,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useDeleteThread, useThreads } from "@/lib/hooks/use-history";
 import { exportThread } from "../export";
-import { newChat, openThread } from "../open-thread";
+import { newChat } from "../open-thread";
 import { useChatStore } from "../store";
 
 type Thread = NonNullable<ReturnType<typeof useThreads>["data"]>[number];
@@ -56,6 +58,7 @@ function groupByDate(threads: Thread[]): [string, Thread[]][] {
 
 function ThreadItem({ thread }: { thread: Thread }) {
   const activeId = useChatStore((s) => s.threadId);
+  const router = useRouter();
   const del = useDeleteThread();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -63,13 +66,11 @@ function ThreadItem({ thread }: { thread: Thread }) {
     <SidebarMenuItem className="group/menu-item">
       <SidebarMenuButton
         isActive={thread.id === activeId}
+        render={<Link href={`/chat/${thread.id}`} />}
         onClick={(e) => {
           // Drop focus so the hover-only action doesn't stay pinned visible
           // (SidebarMenuAction shows while the item has focus-within).
           e.currentTarget.blur();
-          openThread(thread.id).catch(() =>
-            toast.error("Couldn't load conversation"),
-          );
         }}
         className="h-auto py-1.5"
         tooltip={thread.title}
@@ -132,8 +133,10 @@ function ThreadItem({ thread }: { thread: Thread }) {
                   {
                     onSuccess: () => {
                       // If the open conversation was deleted, reset the surface.
-                      if (useChatStore.getState().threadId === thread.id)
+                      if (useChatStore.getState().threadId === thread.id) {
                         newChat();
+                        router.push("/chat");
+                      }
                     },
                     onError: () => toast.error("Couldn't delete conversation"),
                   },
