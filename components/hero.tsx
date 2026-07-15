@@ -11,7 +11,7 @@ import {
   Wand2,
 } from "lucide-react";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 gsap.registerPlugin(useGSAP);
@@ -26,6 +26,7 @@ const QUICK_ACTIONS = [
 export function Hero() {
   const { isSignedIn } = useAuth();
   const container = useRef<HTMLElement>(null);
+  const [showVideo, setShowVideo] = useState(false);
 
   useGSAP(
     () => {
@@ -113,7 +114,13 @@ export function Hero() {
         data-hero-cta
         className="mt-8 flex flex-wrap items-center justify-center gap-3"
       >
-        <Button variant="secondary" size="lg" className="gap-2">
+        <Button
+          variant="secondary"
+          size="lg"
+          className="gap-2"
+          type="button"
+          onClick={() => setShowVideo(true)}
+        >
           <PlayCircle className="size-4" /> Watch Video
         </Button>
         <Link href={isSignedIn ? "/chat" : "/sign-up"}>
@@ -150,6 +157,24 @@ export function Hero() {
           </Button>
         </div>
       </div>
+
+      {/* Showcase video lightbox — click outside or Esc-free close button */}
+      {showVideo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={() => setShowVideo(false)}
+        >
+          {/* biome-ignore lint/a11y/useMediaCaption: marketing showcase clip, music only */}
+          <video
+            src="/showcase.mp4"
+            autoPlay
+            controls
+            playsInline
+            className="max-h-[85vh] w-full max-w-4xl rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </main>
   );
 }
