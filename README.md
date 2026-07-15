@@ -1,44 +1,70 @@
 # Prompt Forge
 
-Production-ready full-stack app with Clerk auth, oRpc API, TanStack Query, Prisma + MongoDB.
+AI-powered prompt engineering workbench. Draft, refine, and version prompts with
+streaming AI assistance — including **Deep Forge** (multi-variant A/B/C generation
+with a comparative critic pass), chat history, project organization, favorites,
+and public share links.
+
+Built with Next.js 16, React 19, Clerk, oRpc, TanStack Query, Prisma + MongoDB,
+and the Vercel AI SDK via OpenRouter.
+
+## Features
+
+- **Streaming AI chat** — prompt forging via Vercel AI SDK + OpenRouter
+- **Deep Forge** — generates A/B/C prompt variants, then a comparative critic pass picks and refines the best
+- **Projects & forges** — organize prompts, favorite them, share via public links
+- **Chat history** — persisted threads with search (oldest trimmed at 100)
+- **Daily quota** — server-side per-user prompt limits with rate limiting
 
 ## Quick Start
 
-1. **Setup environment**
+1. **Setup environment** — copy `.env.example` to `.env.local` and fill in:
    ```bash
-   # Update .env.local with:
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
    CLERK_SECRET_KEY=sk_...
    DATABASE_URL=mongodb+srv://...
-   NEXT_PUBLIC_API_URL=http://localhost:3000
+   OPENROUTER_API_KEY=sk-or-...
+   OPENROUTER_MODEL=openai/gpt-4o-mini   # any OpenRouter model id
    ```
 
-2. **Setup database**
+2. **Install & setup database**
    ```bash
-   npx prisma db push
+   bun install
+   bun run db:push
    ```
 
 3. **Run**
    ```bash
-   npm run dev
+   bun run dev
    ```
 
 4. **Visit** http://localhost:3000
 
+## Commands
+
+```bash
+bun run dev           # start dev server
+bun run build         # production build
+bun run lint          # biome check
+bun run format        # biome format --write
+bun run db:push       # prisma db push
+bun run db:generate   # prisma generate (also runs on postinstall)
+bun run eval          # LLM prompt eval suite
+```
+
 ## Architecture
 
-- **proxy.ts** — Clerk auth gate (Next.js 16)
-- **app/api/rpc/[...path]/route.ts** — RPCHandler (oRpc)
-- **lib/orpc.ts** — Route definitions (type-safe)
-- **lib/tanstack-query.ts** — Query client with SSR hydration
-- **app/dashboard/layout.tsx** — Server prefetch + hydration
-- **prisma/schema.prisma** — MongoDB schema
+- **`proxy.ts`** — Clerk auth gate (Next.js 16 uses `proxy.ts`, not `middleware.ts`)
+- **`app/api/rpc/[[...rest]]/route.ts`** — oRpc HTTP handler
+- **`lib/orpc/router.ts`** — route registry (`user`, `project`, `forge`, `history`)
+- **`lib/orpc/server.ts`** — SSR direct client (no HTTP round-trip during pre-render)
+- **`lib/query-client.ts`** — TanStack Query client with custom serializer
+- **`app/dashboard/layout.tsx`** — canonical SSR prefetch + hydration template
+- **`app/api/chat/route.ts`** — AI chat streaming (Vercel AI SDK + OpenRouter)
+- **`prisma/schema.prisma`** — MongoDB schema
 
-## Add Feature
+## Contributing / Adding a Feature
 
-1. Add model to `prisma/schema.prisma`
-2. `npx prisma db push`
-3. Add routes to `lib/orpc.ts`
-4. Use: `useQuery(orpc.route.queryOptions({}))`
-
-See `AGENTS.md` for more details.
+See [AGENTS.md](./AGENTS.md) for the full feature workflow (Prisma model →
+`db:push` → oRpc route in `lib/orpc/routers/` → hook in `lib/hooks/`),
+SSR hydration patterns, and Base UI gotchas.
