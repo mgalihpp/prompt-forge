@@ -69,6 +69,20 @@ model ForgedPrompt {
   @@index([clerkId])
 }
 
+model PromptTemplate {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String // owner (Clerk user id)
+  label     String // short display name
+  emoji     String   @default("📝")
+  ore       String // the composer prefill
+  opts      Json // the knob values (mode/persona/tone/format/target)
+  deepForge Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clerkId])
+}
+
 model DailyUsage {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   clerkId String

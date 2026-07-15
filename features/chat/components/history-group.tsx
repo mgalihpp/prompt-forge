@@ -27,6 +27,7 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import { useDeleteThread, useThreads } from "@/lib/hooks/use-history";
 import { exportThread } from "../export";
@@ -149,7 +150,22 @@ function ThreadItem({ thread }: { thread: Thread }) {
 }
 
 export function HistoryGroup() {
-  const { data: threads = [] } = useThreads();
+  const { data: threads = [], isPending } = useThreads();
+
+  if (isPending) {
+    return (
+      <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+        <SidebarGroupLabel>Today</SidebarGroupLabel>
+        <SidebarMenu>
+          {["a", "b", "c", "d", "e"].map((k) => (
+            <SidebarMenuItem key={k}>
+              <SidebarMenuSkeleton />
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+    );
+  }
 
   return groupByDate(threads).map(([label, group]) => (
     <SidebarGroup key={label} className="group-data-[collapsible=icon]:hidden">
