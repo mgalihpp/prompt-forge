@@ -1,5 +1,6 @@
 import { generateText, type ModelMessage } from "ai";
 import { chatModel } from "@/lib/ai";
+import { VARIANT_ANGLES, type VariantLabel } from "@/lib/deep-forge";
 
 /**
  * ─────────────────────────────────────────────────────────────────────────
@@ -187,6 +188,10 @@ export function systemPrompt(
 /**
  * Critic system prompt for the Deep Forge reflection pass — one bounded pass,
  * not an open loop.
+ *
+ * NOTE: production Deep Forge now runs the variants pipeline (see
+ * `variantSystemPrompt` below and `app/api/chat/route.ts`); this reflection
+ * pass survives only for the offline eval harness (`forgeText` / `--deep`).
  */
 export function reflectSystemPrompt(base: string): string {
   return [
@@ -231,4 +236,60 @@ export async function forgeText(
     messages: reflectionMessages,
   });
   return reflected.text;
+}
+
+/**
+ * ─────────────────────────────────────────────────────────────────────────
+ *  DEEP FORGE — VARIANTS PIPELINE PROMPTS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+/**
+ * System prompt for one variant of the Deep Forge A/B/C pipeline: the full
+ * deep-forge system prompt plus an ANGLE block that steers this variant's
+ * strategy. All three variants share the ore; only the angle differs.
+ */
+export function variantSystemPrompt(
+  opts: ForgeOpts = {},
+  label: VariantLabel,
+): string {
+  const angle = VARIANT_ANGLES[label];
+  return [
+    systemPrompt(opts, true),
+    "",
+    "──────────────────────────────────────────────────────────────────────",
+    `## ANGLE — ${angle.name.toUpperCase()} (variant ${label})`,
+    angle.directive,
+    "This angle shapes strategy only: the CORE RULE (forge, never answer) and the OUTPUT CONTRACT (emit ONLY the finished forged prompt) still bind absolutely.",
+  ].join("\n");
+}
+
+/**
+ * Critic persona for the single comparative review of all three variants.
+ * Mirrors the offline eval judge's calibration doctrine.
+ */
+export function critiqueSystemPrompt(): string {
+  return [
+    "You are a strict, calibrated evaluator of PROMPTS produced by a prompt-enhancement tool called Prompt Forge. The tool transforms a user's rough input ('ore') into a high-quality prompt for a downstream AI — it must NEVER answer the input itself.",
+    "You will receive the ore and THREE forged variants (A, B, C), each built from a different angle. Judge them comparatively on the same rubric. Score conservatively: reserve 5 for genuinely excellent work; the didNotAnswer axis is the gate — a variant that answered the ore instead of forging it scores 1 there.",
+    "Strengths and weaknesses must be concrete and specific to each variant (cite what it does, not generic praise), written in the user's language.",
+    "followUps must be short refinement requests the USER could send next to improve the forged prompt further ('make it shorter', 'add an example output', 'target Claude instead') — written in the user's language, never answers to the ore, never questions back to the user.",
+    "Return only the structured verdict.",
+  ].join("\n");
+}
+
+/** User message for the critic: labeled ore + the three variants. */
+export function critiqueUserPrompt(
+  ore: string,
+  variants: { label: string; angle: string; text: string }[],
+): string {
+  return [
+    "── ORE (the user's rough input) ──",
+    ore,
+    ...variants.flatMap((v) => [
+      "",
+      `── VARIANT ${v.label} (${v.angle}) ──`,
+      v.text || "(generation failed — score all axes 1 and note the failure)",
+    ]),
+  ].join("\n");
 }
