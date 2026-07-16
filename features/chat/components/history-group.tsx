@@ -4,7 +4,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { Download, MoreHorizontal, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -154,8 +154,10 @@ function ThreadItem({ thread }: { thread: Thread }) {
 
 export function HistoryGroup() {
   const { data: threads = [], isPending } = useThreads();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  if (isPending) {
+  if (isPending || !mounted) {
     return (
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
         <SidebarGroupLabel>Today</SidebarGroupLabel>
