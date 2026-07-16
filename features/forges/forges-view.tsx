@@ -29,7 +29,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -43,6 +42,7 @@ import {
   useToggleFavorite,
   useUnshareForge,
 } from "@/lib/hooks/use-forges";
+import { ForgeCardSkeleton } from "./forge-card-skeleton";
 
 export function ForgesView() {
   const { data: forges, isLoading, error } = useForges();
@@ -52,7 +52,7 @@ export function ForgesView() {
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         {["a", "b", "c", "d"].map((k) => (
-          <Skeleton key={k} className="h-44 rounded-xl" />
+          <ForgeCardSkeleton key={k} />
         ))}
       </div>
     );

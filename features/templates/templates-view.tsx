@@ -9,11 +9,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useTemplates } from "@/lib/hooks/use-templates";
 import { CreateTemplateDialog } from "./create-template-dialog";
 import { CATEGORIES, CURATED_TEMPLATES } from "./curated";
 import { TemplateCard } from "./template-card";
+import { TemplateCardSkeleton } from "./template-card-skeleton";
 
 function MyTemplates() {
   const { data: templates, isLoading, error } = useTemplates();
@@ -30,7 +30,7 @@ function MyTemplates() {
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2">
           {["a", "b"].map((k) => (
-            <Skeleton key={k} className="h-44 rounded-xl" />
+            <TemplateCardSkeleton key={k} />
           ))}
         </div>
       ) : error ? (

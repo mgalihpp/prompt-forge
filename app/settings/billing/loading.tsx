@@ -1,6 +1,3 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
 import { Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,17 +10,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress, ProgressLabel } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { orpc } from "@/lib/orpc/client";
 import { FREE_DAILY_LIMIT, PRO_FEATURES } from "@/lib/plans";
 
-export function BillingView() {
-  const { data: usage } = useQuery(orpc.user.usage.queryOptions());
-
-  const used = usage?.used ?? 0;
-  const limit = usage?.limit ?? FREE_DAILY_LIMIT;
-
+/**
+ * Shown while billing/page.tsx awaits the user.usage prefetch. BillingView is
+ * almost entirely static copy, so this reproduces it verbatim and only the
+ * usage progress pulses — same as BillingView's own pre-data state.
+ */
+export default function BillingLoading() {
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -33,7 +28,6 @@ export function BillingView() {
         </p>
       </div>
 
-      {/* Current plan: Free */}
       <Card>
         <CardHeader>
           <CardTitle>Free Plan</CardTitle>
@@ -45,26 +39,13 @@ export function BillingView() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          {usage ? (
-            <Progress value={used} max={limit} className="gap-2">
-              <ProgressLabel className="text-xs font-normal text-muted-foreground">
-                Prompts used today
-              </ProgressLabel>
-              <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-                <span className="font-semibold text-foreground">{used}</span> /{" "}
-                {limit}
-              </span>
-            </Progress>
-          ) : (
-            <Skeleton className="h-9 w-full" />
-          )}
+          <Skeleton className="h-9 w-full" />
         </CardContent>
         <CardFooter className="text-xs text-muted-foreground">
           Your allowance resets at midnight UTC.
         </CardFooter>
       </Card>
 
-      {/* Pro plan teaser */}
       <Card className="ring-primary/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-1.5">
