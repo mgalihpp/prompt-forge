@@ -37,10 +37,21 @@ function UsageCardContent({
 }) {
   if (plan === "pro") {
     return (
-      <div className="flex items-center gap-2">
-        <Sparkles className="size-4 shrink-0 text-primary" />
-        <span className="text-sm font-semibold">Pro Plan</span>
-        <span className="ml-auto text-xs text-muted-foreground">Unlimited</span>
+      <div className="btn-shine [--shine-opacity:0.14] relative overflow-hidden rounded-lg border border-primary/30 bg-linear-to-r from-primary/15 via-primary/5 to-primary/15 px-3 py-2.5">
+        {/* Corner glow so the Pro state reads richer than the flat free card */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-6 -right-6 size-16 rounded-full bg-primary/25 blur-xl"
+        />
+        <div className="relative flex items-center gap-2">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30">
+            <Sparkles className="size-3.5 text-primary" />
+          </span>
+          <span className="text-sm font-semibold">Pro Plan</span>
+          <span className="ml-auto rounded-full bg-primary/15 px-2 py-0.5 text-[0.7rem] font-medium text-primary ring-1 ring-primary/25">
+            Unlimited
+          </span>
+        </div>
       </div>
     );
   }
@@ -60,7 +71,7 @@ function UsageCardContent({
       </Progress>
       <Button
         variant="glossy"
-        className="w-full"
+        className="btn-shine w-full"
         nativeButton={false}
         render={<Link href="/settings/billing" />}
       >

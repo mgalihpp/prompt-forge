@@ -178,7 +178,11 @@ export function Pricing() {
                     href={isSignedIn ? "/settings/billing" : "/sign-up"}
                     className="block"
                   >
-                    <Button variant="glossy" size="lg" className="w-full">
+                    <Button
+                      variant="glossy"
+                      size="lg"
+                      className="btn-shine w-full"
+                    >
                       <Sparkles className="size-4" /> {cta}
                     </Button>
                   </Link>
@@ -187,7 +191,7 @@ export function Pricing() {
                     href={isSignedIn ? "/chat" : "/sign-up"}
                     className="block"
                   >
-                    <Button variant="glossy" size="lg" className="w-full">
+                    <Button variant="outline" size="lg" className="w-full">
                       {cta}
                     </Button>
                   </Link>

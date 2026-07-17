@@ -124,6 +124,44 @@
     transparent;
 }
 
+@layer components {
+  /* Premium shine sweep for Pro CTAs — a light band glides across on a loop */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent,
+      rgb(255 255 255 / var(--shine-opacity, 0.45)),
+      transparent
+    );
+    transform: translateX(-150%) skewX(-15deg);
+    animation: btn-shine-sweep 2.75s ease-in-out infinite;
+  }
+  @keyframes btn-shine-sweep {
+    0% {
+      transform: translateX(-150%) skewX(-15deg);
+    }
+    60%,
+    100% {
+      transform: translateX(420%) skewX(-15deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-shine::after {
+      animation: none;
+      display: none;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

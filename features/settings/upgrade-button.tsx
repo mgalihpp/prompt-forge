@@ -5,6 +5,7 @@ import { CheckoutButton, usePlans } from "@clerk/nextjs/experimental";
 import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * Wraps our own glossy button with Clerk's <CheckoutButton>, which opens the
@@ -27,7 +28,7 @@ export function UpgradeButton({
   const proPlan = plans?.find((p) => p.slug === "pro");
 
   const glossy = (
-    <Button variant="glossy" size="lg" className={className}>
+    <Button variant="glossy" size="lg" className={cn("btn-shine", className)}>
       <Sparkles className="size-4" /> {label}
     </Button>
   );
@@ -39,7 +40,7 @@ export function UpgradeButton({
       <Button
         variant="glossy"
         size="lg"
-        className={className}
+        className={cn("btn-shine", className)}
         onClick={() =>
           router.push(isSignedIn ? "/settings/billing" : "/sign-up")
         }
@@ -50,7 +51,12 @@ export function UpgradeButton({
   }
 
   return (
-    <CheckoutButton planId={proPlan.id} planPeriod="month" for="user">
+    <CheckoutButton
+      planId={proPlan.id}
+      planPeriod="month"
+      for="user"
+      newSubscriptionRedirectUrl="/chat"
+    >
       {glossy}
     </CheckoutButton>
   );
