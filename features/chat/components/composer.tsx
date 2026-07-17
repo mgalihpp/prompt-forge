@@ -1,5 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
 import { ArrowUp, Hammer, SlidersHorizontal, Square } from "lucide-react";
-import { memo, useCallback, useRef, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,13 +25,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import { useCreateThread } from "@/lib/hooks/use-history";
+import { useIsPro } from "@/lib/hooks/use-plan";
+import { orpc } from "@/lib/orpc/client";
+import { cn } from "@/lib/utils";
 import { chat } from "../chat-instance";
 import { OPTIONS } from "../constants";
 import { useSendText } from "../send";
 import { useChatStore } from "../store";
+import { useUpgradeDialog } from "../upgrade-dialog-store";
 import { ModelSelector } from "./model-selector";
+import { UpgradeDialog } from "./upgrade-dialog";
 
 function useChatStatus() {
   return useSyncExternalStore(
@@ -62,12 +74,31 @@ export function Composer() {
   const hasInput = useChatStore((s) => s.input.trim().length > 0);
   const setOption = useChatStore((s) => s.setOption);
   const toggleDeepForge = useChatStore((s) => s.toggleDeepForge);
+  const isPro = useIsPro();
+  const router = useRouter();
+  const openUpgrade = useUpgradeDialog((s) => s.setOpen);
+  const { data: usage } = useQuery(orpc.user.usage.queryOptions());
+
+  // Free users at their daily cap: `limit` is a number, `used >= limit`.
+  const outOfPrompts =
+    !isPro && usage != null && usage.limit != null && usage.used >= usage.limit;
+
+  // Deep Forge is Pro-only. Force a persisted `true` off for free users so a
+  // stale toggle can't send (the server 403 is the backstop).
+  useEffect(() => {
+    if (!isPro && useChatStore.getState().deepForge) {
+      useChatStore.setState({ deepForge: false });
+    }
+  }, [isPro]);
 
   const status = useChatStatus();
   const { isPending: creatingThread } = useCreateThread();
-  const busy = status === "submitted" || status === "streaming" || creatingThread;
+  const busy =
+    status === "submitted" || status === "streaming" || creatingThread;
   const busyRef = useRef(false);
   busyRef.current = busy;
+  const outOfPromptsRef = useRef(outOfPrompts);
+  outOfPromptsRef.current = outOfPrompts;
 
   // useSendText is referentially stable, so `send` stays stable for ChatInput
   const sendText = useSendText();
@@ -77,9 +108,16 @@ export function Composer() {
     const text = input.trim();
     if (!text || busyRef.current) return;
 
+    // Free user out of quota: open the upgrade dialog instead of a doomed
+    // request. The server 429 is the backstop if this check is ever stale.
+    if (outOfPromptsRef.current) {
+      openUpgrade(true);
+      return;
+    }
+
     await sendText(text);
     useChatStore.setState({ input: "" });
-  }, [sendText]);
+  }, [sendText, openUpgrade]);
 
   return (
     <div className="shrink-0 bg-background/80 rounded-t-3xl backdrop-blur-xl">
@@ -148,21 +186,32 @@ export function Composer() {
                   <Button
                     type="button"
                     variant={deepForge ? "glossy" : "ghost"}
-                    size={deepForge ? "sm" : "icon"}
+                    size={deepForge || !isPro ? "sm" : "icon"}
                     className={cn(
                       "transition-[background-color,box-shadow,color,filter] duration-200 ease-out",
-                      deepForge
+                      deepForge || !isPro
                         ? "h-8 gap-1.5 rounded-full text-xs"
                         : "size-8 rounded-full",
                     )}
-                    onClick={toggleDeepForge}
+                    onClick={
+                      isPro
+                        ? toggleDeepForge
+                        : () => router.push("/settings/billing")
+                    }
                   />
                 }
               >
                 <Hammer className="size-4" />
                 {deepForge && "ON"}
+                {!isPro && (
+                  <span className="rounded bg-primary/15 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary">
+                    Pro
+                  </span>
+                )}
               </TooltipTrigger>
-              <TooltipContent>Deep Forge</TooltipContent>
+              <TooltipContent>
+                {isPro ? "Deep Forge" : "Deep Forge — a Pro feature"}
+              </TooltipContent>
             </Tooltip>
 
             {busy ? (
@@ -188,6 +237,7 @@ export function Composer() {
           </div>
         </div>
       </div>
+      <UpgradeDialog />
     </div>
   );
 }

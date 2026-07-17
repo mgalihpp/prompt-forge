@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, Cpu, Loader2, Search } from "lucide-react";
-import { memo, useDeferredValue, useMemo, useState } from "react";
+import { Check, Cpu, Loader2, Lock, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { memo, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,14 +16,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useModels } from "@/lib/hooks/use-models";
-import type { FreeModel } from "@/lib/models";
+import { useIsPro } from "@/lib/hooks/use-plan";
+import type { ChatModel } from "@/lib/models";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "../store";
 import { ProviderIcon } from "./provider-icon";
 
 // Short, human label for a model — OpenRouter names are "Vendor: Model (free)";
 // drop the vendor prefix and the trailing "(free)" for a tidy trigger/row.
-function shortName(m: FreeModel): string {
+function shortName(m: ChatModel): string {
   return m.name
     .replace(/^[^:]+:\s*/, "")
     .replace(/\s*\(free\)\s*$/i, "")
@@ -40,7 +42,7 @@ const ProviderRail = memo(function ProviderRail({
 }) {
   return (
     <div
-      className="flex w-12 shrink-0 flex-col items-center gap-1 overflow-y-auto border-r py-1.5"
+      className="flex w-12 shrink-0 flex-col items-center gap-2 overflow-y-auto border-r py-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-track]:bg-transparent"
       role="tablist"
       aria-label="Filter models by provider"
     >
@@ -54,7 +56,7 @@ const ProviderRail = memo(function ProviderRail({
               aria-label="All providers"
               onClick={() => onSelect(null)}
               className={cn(
-                "flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                "flex p-1.5 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                 active === null && "bg-accent text-accent-foreground",
               )}
             />
@@ -75,7 +77,7 @@ const ProviderRail = memo(function ProviderRail({
                 aria-label={p}
                 onClick={() => onSelect(active === p ? null : p)}
                 className={cn(
-                  "flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                  "flex p-1.5 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
                   active === p && "bg-accent text-accent-foreground",
                 )}
               />
@@ -95,10 +97,12 @@ const ProviderRail = memo(function ProviderRail({
 const ModelRow = memo(function ModelRow({
   model,
   selected,
+  locked,
   onSelect,
 }: {
-  model: FreeModel;
+  model: ChatModel;
   selected: boolean;
+  locked: boolean;
   onSelect: () => void;
 }) {
   return (
@@ -106,10 +110,12 @@ const ModelRow = memo(function ModelRow({
       type="button"
       role="option"
       aria-selected={selected}
+      aria-disabled={locked || undefined}
       onClick={onSelect}
       className={cn(
         "flex w-full items-start gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none",
         selected && "bg-accent/60",
+        locked && "opacity-60",
       )}
     >
       <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted p-1.5">
@@ -120,9 +126,16 @@ const ModelRow = memo(function ModelRow({
           <span className="truncate font-medium text-sm text-foreground">
             {shortName(model)}
           </span>
-          <span className="shrink-0 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-500">
-            Free
-          </span>
+          {model.tier === "pro" ? (
+            <span className="shrink-0 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+              Pro
+            </span>
+          ) : (
+            <span className="shrink-0 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-500">
+              Free
+            </span>
+          )}
+          {locked && <Lock className="size-3 shrink-0 text-muted-foreground" />}
         </span>
         {model.description && (
           <span className="mt-0.5 line-clamp-2 block text-xs text-muted-foreground">
@@ -138,6 +151,8 @@ const ModelRow = memo(function ModelRow({
 export function ModelSelector() {
   const model = useChatStore((s) => s.model);
   const setModel = useChatStore((s) => s.setModel);
+  const isPro = useIsPro();
+  const router = useRouter();
 
   const { data: models, isLoading, isError } = useModels();
   const [open, setOpen] = useState(false);
@@ -146,6 +161,13 @@ export function ModelSelector() {
   const deferredQuery = useDeferredValue(query);
 
   const list = useMemo(() => models ?? [], [models]);
+
+  // A persisted pro selection from a lapsed subscription: fall back to the
+  // default model. The server 403 is the real gate; this keeps the UI honest.
+  const storedSelection = list.find((m) => m.id === model) ?? null;
+  useEffect(() => {
+    if (!isPro && storedSelection?.tier === "pro") setModel(null);
+  }, [isPro, storedSelection, setModel]);
 
   const providers = useMemo(
     () => Array.from(new Set(list.map((m) => m.provider))).sort(),
@@ -213,7 +235,7 @@ export function ModelSelector() {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search free models…"
+            placeholder="Search models…"
             aria-label="Search models"
             className="h-10 border-none bg-transparent pl-8 text-sm focus-visible:ring-0 dark:bg-transparent"
           />
@@ -230,7 +252,7 @@ export function ModelSelector() {
 
           <div
             role="listbox"
-            aria-label="Free models"
+            aria-label="Models"
             className="flex-1 space-y-0.5 overflow-y-auto p-1.5"
           >
             {model && (
@@ -271,17 +293,26 @@ export function ModelSelector() {
                 </div>
               )}
 
-            {filtered.map((m) => (
-              <ModelRow
-                key={m.id}
-                model={m}
-                selected={m.id === model}
-                onSelect={() => {
-                  setModel(m.id);
-                  setOpen(false);
-                }}
-              />
-            ))}
+            {filtered.map((m) => {
+              const locked = m.tier === "pro" && !isPro;
+              return (
+                <ModelRow
+                  key={m.id}
+                  model={m}
+                  selected={m.id === model}
+                  locked={locked}
+                  onSelect={() => {
+                    if (locked) {
+                      setOpen(false);
+                      router.push("/settings/billing");
+                      return;
+                    }
+                    setModel(m.id);
+                    setOpen(false);
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       </PopoverContent>

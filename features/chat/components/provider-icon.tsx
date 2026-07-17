@@ -37,6 +37,7 @@ const KNOWN = new Set([
   "bytedance",
   "huggingface",
   "liquid",
+  "anthropic",
 ]);
 
 function lobeSlug(provider: string): string | null {
