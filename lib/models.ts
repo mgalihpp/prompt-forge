@@ -1,22 +1,42 @@
 import "server-only";
 
-// OpenRouter model catalog, filtered to the free tier only (per product
-// decision: free models first). We fetch the public /models endpoint, keep
-// the entries whose prompt+completion price is zero, and normalise each into
-// a compact shape the client picker renders. Results are cached in-process
-// with a short TTL so the picker doesn't hammer OpenRouter on every request.
+// OpenRouter model catalog for the composer's picker. Two tiers:
+//   - "free": every model OpenRouter prices at $0 prompt+completion.
+//   - "pro":  a small curated allow-list of paid models (below). Curated, not
+//             "all paid models", to bound OpenRouter spend and keep the picker
+//             sane. Both tiers are normalised from the same public /models
+//             response and cached in-process with a short TTL.
 
 const MODELS_URL = "https://openrouter.ai/api/v1/models";
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
-export type FreeModel = {
+// Curated paid models unlocked by Pro. Verified present in the live catalog.
+// Adding an id here is the only step to surface a new premium model.
+const PRO_MODEL_IDS = new Set([
+  "anthropic/claude-sonnet-4.5",
+  "anthropic/claude-opus-4.1",
+  "anthropic/claude-haiku-4.5",
+  "openai/gpt-4o",
+  "openai/gpt-4o-mini",
+  "openai/gpt-4.1",
+  "google/gemini-2.5-pro",
+  "google/gemini-2.5-flash",
+  "deepseek/deepseek-chat",
+  "moonshotai/kimi-k2",
+]);
+
+export type ChatModel = {
   id: string; // OpenRouter id, e.g. "qwen/qwen3-coder:free"
   name: string; // human label, e.g. "Qwen: Qwen3 Coder (free)"
   provider: string; // vendor slug from the id, e.g. "qwen"
   description: string; // short blurb (trimmed)
   contextLength: number; // max context window in tokens
   modalities: string[]; // input modalities, e.g. ["text", "image"]
+  tier: "free" | "pro"; // gate: pro models require an active Pro plan
 };
+
+/** @deprecated use ChatModel — kept so existing importers don't break. */
+export type FreeModel = ChatModel;
 
 type OpenRouterModel = {
   id: string;
@@ -36,7 +56,7 @@ function isFree(m: OpenRouterModel): boolean {
   return prompt === 0 && completion === 0;
 }
 
-function toFreeModel(m: OpenRouterModel): FreeModel {
+function toChatModel(m: OpenRouterModel, tier: "free" | "pro"): ChatModel {
   const desc = (m.description ?? "").trim();
   return {
     id: m.id,
@@ -46,13 +66,14 @@ function toFreeModel(m: OpenRouterModel): FreeModel {
     description: desc.length > 140 ? `${desc.slice(0, 137).trimEnd()}…` : desc,
     contextLength: m.context_length ?? 0,
     modalities: m.architecture?.input_modalities ?? ["text"],
+    tier,
   };
 }
 
-let cache: { at: number; models: FreeModel[] } | null = null;
-let inflight: Promise<FreeModel[]> | null = null;
+let cache: { at: number; models: ChatModel[] } | null = null;
+let inflight: Promise<ChatModel[]> | null = null;
 
-async function fetchFreeModels(): Promise<FreeModel[]> {
+async function fetchCatalog(): Promise<ChatModel[]> {
   const res = await fetch(MODELS_URL, {
     headers: process.env.OPENROUTER_API_KEY
       ? { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}` }
@@ -64,19 +85,28 @@ async function fetchFreeModels(): Promise<FreeModel[]> {
     throw new Error(`OpenRouter models fetch failed: ${res.status}`);
   }
   const json = (await res.json()) as { data: OpenRouterModel[] };
-  return json.data
-    .filter(isFree)
-    .map(toFreeModel)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const models: ChatModel[] = [];
+  for (const m of json.data) {
+    if (isFree(m)) models.push(toChatModel(m, "free"));
+    else if (PRO_MODEL_IDS.has(m.id)) models.push(toChatModel(m, "pro"));
+  }
+  // Free first, then pro; alphabetical within each tier.
+  return models.sort((a, b) =>
+    a.tier === b.tier
+      ? a.name.localeCompare(b.name)
+      : a.tier === "free"
+        ? -1
+        : 1,
+  );
 }
 
-/** Cached list of free OpenRouter models. Never throws — returns [] on error. */
-export async function getFreeModels(): Promise<FreeModel[]> {
+/** Cached model catalog (free + curated pro). Never throws — [] on error. */
+export async function getModels(): Promise<ChatModel[]> {
   const now = Date.now();
   if (cache && now - cache.at < CACHE_TTL_MS) return cache.models;
   if (inflight) return inflight;
 
-  inflight = fetchFreeModels()
+  inflight = fetchCatalog()
     .then((models) => {
       cache = { at: Date.now(), models };
       return models;
@@ -89,8 +119,21 @@ export async function getFreeModels(): Promise<FreeModel[]> {
   return inflight;
 }
 
-/** True when `id` is a currently-known free model — the server's allow-list. */
-export async function isFreeModelId(id: string): Promise<boolean> {
-  const models = await getFreeModels();
-  return models.some((m) => m.id === id);
+/** Just the free tier — kept for any consumer that only wants free models. */
+export async function getFreeModels(): Promise<ChatModel[]> {
+  return (await getModels()).filter((m) => m.tier === "free");
+}
+
+/**
+ * Whether `id` may be used by a request. Free ids are always allowed; pro ids
+ * require Pro; anything else is unknown (caller falls back to the default).
+ */
+export async function isAllowedModelId(
+  id: string,
+  isPro: boolean,
+): Promise<"ok" | "pro-required" | "unknown"> {
+  const model = (await getModels()).find((m) => m.id === id);
+  if (!model) return "unknown";
+  if (model.tier === "free") return "ok";
+  return isPro ? "ok" : "pro-required";
 }

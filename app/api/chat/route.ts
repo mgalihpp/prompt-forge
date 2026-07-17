@@ -30,7 +30,9 @@ import {
   systemPrompt,
   variantSystemPrompt,
 } from "@/lib/forge-prompt";
-import { isFreeModelId } from "@/lib/models";
+import { isAllowedModelId } from "@/lib/models";
+import { resolvePlan } from "@/lib/plan";
+import { DEEP_FORGE_PRO_MESSAGE, PRO_MODEL_MESSAGE } from "@/lib/plans";
 import { prisma } from "@/lib/prisma";
 import { checkUsage, LIMIT_MESSAGE, trySpendPrompt } from "@/lib/usage";
 
@@ -146,21 +148,34 @@ async function truncateThread(
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
+  const { userId, has } = await auth();
   if (!userId) return new Response("Unauthorized", { status: 401 });
+  const isPro = resolvePlan(userId, has) === "pro";
 
-  if (!(await checkUsage(userId))) {
+  if (!(await checkUsage(userId, isPro))) {
     return new Response(LIMIT_MESSAGE, { status: 429 });
   }
 
   const { messages, opts, deepForge, threadId, mode, model }: Body =
     await req.json();
 
-  // Only honour a model the free catalog currently vouches for — anything
-  // else (paid, unknown, or spoofed) falls back to the default. Validated
-  // once here so both the standard and deep-forge paths share the choice.
-  const activeModel =
-    model && (await isFreeModelId(model)) ? resolveModel(model) : chatModel;
+  // Deep Forge is a Pro feature — reject early for free users.
+  if (deepForge && !isPro) {
+    return new Response(DEEP_FORGE_PRO_MESSAGE, { status: 403 });
+  }
+
+  // Resolve the requested model against the catalog + the user's plan. A pro
+  // model chosen by a free user is rejected outright (rather than silently
+  // downgraded) so the intent is visible; unknown/stale ids fall back to the
+  // default. Validated once here so both paths share the choice.
+  let activeModel = chatModel;
+  if (model) {
+    const allowed = await isAllowedModelId(model, isPro);
+    if (allowed === "pro-required") {
+      return new Response(PRO_MODEL_MESSAGE, { status: 403 });
+    }
+    if (allowed === "ok") activeModel = resolveModel(model);
+  }
 
   const modelMessages = await convertToModelMessages(canonicalize(messages));
   const userText = textOf(messages.at(-1));
@@ -177,7 +192,7 @@ export async function POST(req: Request) {
           await truncateThread(userId, threadId, messages.length - 1);
         }
         await Promise.all([
-          trySpendPrompt(userId).catch(() => {}),
+          trySpendPrompt(userId, isPro).catch(() => {}),
           threadId
             ? persistExchange(userId, threadId, userText, text).catch(() => {})
             : Promise.resolve(),
@@ -292,7 +307,7 @@ export async function POST(req: Request) {
         await truncateThread(userId, threadId, messages.length - 1);
       }
       await Promise.all([
-        trySpendPrompt(userId).catch(() => {}),
+        trySpendPrompt(userId, isPro).catch(() => {}),
         threadId
           ? persistExchange(
               userId,

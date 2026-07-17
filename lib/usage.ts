@@ -8,16 +8,20 @@ export function utcDay(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** Prompts spent today by this user. */
-export async function getUsage(clerkId: string) {
+/** Prompts spent today by this user. Pro users have no cap (`limit: null`). */
+export async function getUsage(clerkId: string, isPro = false) {
   const row = await prisma.dailyUsage.findUnique({
     where: { clerkId_day: { clerkId, day: utcDay() } },
   });
-  return { used: row?.count ?? 0, limit: FREE_DAILY_LIMIT };
+  return { used: row?.count ?? 0, limit: isPro ? null : FREE_DAILY_LIMIT };
 }
 
 /** Read-only check: does this user have budget for one more prompt today? */
-export async function checkUsage(clerkId: string): Promise<boolean> {
+export async function checkUsage(
+  clerkId: string,
+  isPro = false,
+): Promise<boolean> {
+  if (isPro) return true;
   const row = await prisma.dailyUsage.findUnique({
     where: { clerkId_day: { clerkId, day: utcDay() } },
   });
@@ -27,12 +31,19 @@ export async function checkUsage(clerkId: string): Promise<boolean> {
 /**
  * Spend one prompt from today's quota. Atomic upsert-increment, so parallel
  * requests can't double-spend. Returns false when the user is at the limit —
- * the caller rejects the request.
+ * the caller rejects the request. Pro users still get counted (analytics) but
+ * are never blocked: the `count < limit` guard is dropped so the increment
+ * always applies.
  */
-export async function trySpendPrompt(clerkId: string): Promise<boolean> {
+export async function trySpendPrompt(
+  clerkId: string,
+  isPro = false,
+): Promise<boolean> {
   const day = utcDay();
+  // The guard doubles as the limit enforcer, so pro must drop it entirely.
+  const guard = isPro ? {} : { count: { lt: FREE_DAILY_LIMIT } };
   const updated = await prisma.dailyUsage.updateMany({
-    where: { clerkId, day, count: { lt: FREE_DAILY_LIMIT } },
+    where: { clerkId, day, ...guard },
     data: { count: { increment: 1 } },
   });
   if (updated.count > 0) return true;
@@ -45,7 +56,7 @@ export async function trySpendPrompt(clerkId: string): Promise<boolean> {
     // Unique violation: a parallel request created the row first. Retry the
     // guarded increment once; a second miss really is the limit.
     const retry = await prisma.dailyUsage.updateMany({
-      where: { clerkId, day, count: { lt: FREE_DAILY_LIMIT } },
+      where: { clerkId, day, ...guard },
       data: { count: { increment: 1 } },
     });
     return retry.count > 0;

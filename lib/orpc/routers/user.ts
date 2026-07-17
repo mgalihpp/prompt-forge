@@ -6,7 +6,10 @@ import { getUsage } from "@/lib/usage";
 
 export const userRouter = {
   // Today's prompt quota — read by the billing page and the composer
-  usage: authed.handler(({ context }) => getUsage(context.userId)),
+  usage: authed.handler(async ({ context }) => ({
+    ...(await getUsage(context.userId, context.plan === "pro")),
+    plan: context.plan,
+  })),
 
   // Upserts the DB user from Clerk on read, so the profile stays in sync
   me: authed.handler(async ({ context }) => {
