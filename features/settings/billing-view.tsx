@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Check, Sparkles, Zap } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -140,20 +140,13 @@ export function BillingView() {
           <div className="mt-auto pt-8">
             {isPro ? (
               // Flat row — the Pro card itself is already the container
-              <div className="flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30">
-                  <Zap className="size-4 text-primary" />
-                </span>
-                <span className="flex flex-col">
-                  <span className="text-sm font-semibold">
-                    Unlimited prompts
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground tabular-nums">
-                      {used}
-                    </span>{" "}
-                    forged today — keep going
-                  </span>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold">Unlimited prompts</span>
+                <span className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground tabular-nums">
+                    {used}
+                  </span>{" "}
+                  forged today — keep going
                 </span>
               </div>
             ) : (
