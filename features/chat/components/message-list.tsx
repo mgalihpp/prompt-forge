@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { LIMIT_MESSAGE } from "@/lib/plans";
 import { chat } from "../chat-instance";
 import { useForgyState } from "../hooks/use-forgy-state";
@@ -14,12 +14,20 @@ import { TypingIndicator } from "./typing-indicator";
 export function MessageList() {
   const { messages, status, error, regenerate } = useChat({ chat });
   const openUpgrade = useUpgradeDialog((s) => s.setOpen);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   // Server 429 fallback: if a send slipped past the composer's pre-check and
   // hit the daily limit, surface the upgrade dialog.
   useEffect(() => {
     if (error?.message.includes(LIMIT_MESSAGE)) openUpgrade(true);
   }, [error, openUpgrade]);
+
+  // Auto-scroll to bottom when messages or status change (new message, load thread, streaming).
+  useEffect(() => {
+    messages.length;
+    status;
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, status]);
 
   // Regenerate must carry the same body as a fresh send, or deep forge
   // silently downgrades to a standard forge.
@@ -79,6 +87,7 @@ export function MessageList() {
         {waiting && <TypingIndicator />}
         {error && <ErrorNotice error={error} onRetry={regenerateWithBody} />}
       </div>
+      <div ref={bottomRef} />
     </div>
   );
 }

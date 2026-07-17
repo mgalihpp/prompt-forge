@@ -200,7 +200,11 @@ function enhanceLeanSystemPrompt(opts: ForgeOpts, withFewShot: boolean) {
  * Enhance whenever Deep Forge is active (deep reflection/variants still
  * benefit from the full ANATOMY + PROCESS + DEPTH scaffolding).
  */
-function fullSystemPrompt(opts: ForgeOpts, deepForge: boolean, withFewShot: boolean) {
+function fullSystemPrompt(
+  opts: ForgeOpts,
+  deepForge: boolean,
+  withFewShot: boolean,
+) {
   const { mode } = opts;
   const lines = [
     // ── I. IDENTITY ─────────────────────────────────────────────────────

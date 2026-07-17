@@ -1,14 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import {
-  Check,
-  Copy,
-  Link2,
-  Link2Off,
-  Star,
-  Trash2,
-} from "lucide-react";
+import { Check, Copy, Link2, Link2Off, Star, Trash2 } from "lucide-react";
 import { ForgyLogo } from "@/components/forgy-logo";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

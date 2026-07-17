@@ -127,7 +127,7 @@ const ModelRow = memo(function ModelRow({
             {shortName(model)}
           </span>
           {model.tier === "pro" ? (
-            <span className="shrink-0 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+            <span className="shrink-0 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-500">
               Pro
             </span>
           ) : (
@@ -224,7 +224,7 @@ export function ModelSelector() {
 
       <PopoverContent
         align="start"
-        side="top"
+        side="bottom"
         sideOffset={8}
         className="w-[28rem] max-w-[calc(100vw-2rem)] gap-0 overflow-hidden p-0"
         aria-label="Select a model"
@@ -232,7 +232,6 @@ export function ModelSelector() {
         <div className="relative border-b p-2">
           <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-4 size-4 text-muted-foreground" />
           <Input
-            autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search models…"
