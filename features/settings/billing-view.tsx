@@ -101,6 +101,12 @@ export function BillingView() {
 
         {/* Pro */}
         <div className="relative flex flex-col rounded-2xl border border-primary/40 bg-card p-7 shadow-lg shadow-primary/10 ring-1 ring-primary/20">
+          {/* Shine lives on an inset overlay: btn-shine needs overflow-hidden,
+              which on the card itself would clip the -top-3 badge */}
+          <div
+            aria-hidden
+            className="btn-shine [--shine-opacity:0.08] pointer-events-none absolute inset-0 rounded-2xl"
+          />
           <Badge
             className={cn(
               "absolute -top-3 right-6",
@@ -151,7 +157,7 @@ export function BillingView() {
                 </span>
               </div>
             ) : (
-              <UpgradeButton className="w-full" />
+              <UpgradeButton className="w-full" shine={false} />
             )}
           </div>
         </div>

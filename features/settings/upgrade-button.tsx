@@ -18,9 +18,12 @@ import { cn } from "@/lib/utils";
 export function UpgradeButton({
   className,
   label = "Upgrade to Pro",
+  shine = true,
 }: {
   className?: string;
   label?: string;
+  /** Disable when the surrounding card already carries the shine sweep. */
+  shine?: boolean;
 }) {
   const { isSignedIn } = useAuth();
   const router = useRouter();
@@ -28,7 +31,11 @@ export function UpgradeButton({
   const proPlan = plans?.find((p) => p.slug === "pro");
 
   const glossy = (
-    <Button variant="glossy" size="lg" className={cn("btn-shine", className)}>
+    <Button
+      variant="glossy"
+      size="lg"
+      className={cn(shine && "btn-shine", className)}
+    >
       <Sparkles className="size-4" /> {label}
     </Button>
   );
@@ -40,7 +47,7 @@ export function UpgradeButton({
       <Button
         variant="glossy"
         size="lg"
-        className={cn("btn-shine", className)}
+        className={cn(shine && "btn-shine", className)}
         onClick={() =>
           router.push(isSignedIn ? "/settings/billing" : "/sign-up")
         }
