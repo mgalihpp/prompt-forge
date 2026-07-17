@@ -56,7 +56,7 @@ Two auth levels in `lib/orpc/base.ts`:
 3. Client components read from cache: `useQuery(orpc.*.queryOptions())`.
 4. The `serializer` in `lib/orpc/serializer.ts` handles Date/Map/Set serialization for hydration.
 
-**Important**: Use `app/dashboard/layout.tsx` as the canonical SSR hydration template. The client-side provider is in `app/providers.tsx`.
+**Important**: Use `app/(chat)/chat/layout.tsx` as the canonical SSR hydration template. The client-side provider is in `app/providers.tsx`.
 
 ## Chat Architecture
 

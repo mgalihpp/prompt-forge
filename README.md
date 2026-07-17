@@ -59,7 +59,7 @@ bun run eval          # LLM prompt eval suite
 - **`lib/orpc/router.ts`** — route registry (`user`, `project`, `forge`, `history`)
 - **`lib/orpc/server.ts`** — SSR direct client (no HTTP round-trip during pre-render)
 - **`lib/query-client.ts`** — TanStack Query client with custom serializer
-- **`app/dashboard/layout.tsx`** — canonical SSR prefetch + hydration template
+- **`app/(chat)/chat/layout.tsx`** — canonical SSR prefetch + hydration template
 - **`app/api/chat/route.ts`** — AI chat streaming (Vercel AI SDK + OpenRouter)
 - **`prisma/schema.prisma`** — MongoDB schema
 
