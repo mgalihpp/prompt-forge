@@ -9,15 +9,17 @@ import Link from "next/link";
 import { useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FREE_DAILY_LIMIT } from "@/lib/plans";
+import { FREE_DAILY_LIMIT, PRO_FEATURES } from "@/lib/plans";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// Plans mirror the billing settings page (Free live, Pro coming soon).
+// Plans mirror the billing settings page. Checkout itself happens on
+// /settings/billing via Clerk's PricingTable; these cards just route there.
 const PLANS = [
   {
     name: "Free",
     price: 0,
+    period: "/forever",
     tagline: "Everything you need to start forging prompts.",
     cta: "Start Building",
     features: [
@@ -31,14 +33,10 @@ const PLANS = [
   {
     name: "Pro",
     price: 1,
+    period: "/month",
     tagline: "Higher limits and more power for serious prompt smiths.",
-    cta: "Coming Soon",
-    features: [
-      "Unlimited prompts per day",
-      "Priority access to new models",
-      "Longer prompt history",
-      "Early access to new features",
-    ],
+    cta: "Upgrade to Pro",
+    features: PRO_FEATURES,
     featured: true,
   },
 ];
@@ -134,65 +132,70 @@ export function Pricing() {
         data-pricing-grid
         className="relative mx-auto mt-14 grid max-w-3xl gap-6 sm:grid-cols-2"
       >
-        {PLANS.map(({ name, price, tagline, cta, features, featured }) => (
-          <div
-            key={name}
-            data-pricing-card
-            className={
-              featured
-                ? "relative flex flex-col rounded-2xl border border-primary/40 bg-card p-7 shadow-lg shadow-primary/10 ring-1 ring-primary/20"
-                : "relative flex flex-col rounded-2xl border border-border bg-muted/40 p-7"
-            }
-          >
-            {featured && (
-              <Badge className="absolute -top-3 right-6" variant="default">
-                Coming Soon
-              </Badge>
-            )}
-
-            <h3 className="text-lg font-semibold">{name}</h3>
-
-            <p className="mt-3 text-sm text-muted-foreground">{tagline}</p>
-
-            <div className="mt-6 flex items-baseline gap-1">
-              <span className="text-4xl font-bold tracking-tight">
-                $<span data-price-value={price}>{price}</span>
-              </span>
-              <span className="text-sm text-muted-foreground">/lifetime</span>
-            </div>
-
-            <ul className="mt-6 flex flex-col gap-3">
-              {features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2.5 text-sm">
-                  <Check className="size-4 shrink-0 text-primary" /> {feature}
-                </li>
-              ))}
-            </ul>
-
-            {/* mt-auto pins CTAs to the card bottom so both stay aligned */}
-            <div className="mt-auto pt-8">
-              {featured ? (
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="w-full"
-                  disabled
-                >
-                  <Sparkles className="size-4" /> {cta}
-                </Button>
-              ) : (
-                <Link
-                  href={isSignedIn ? "/chat" : "/sign-up"}
-                  className="block"
-                >
-                  <Button variant="glossy" size="lg" className="w-full">
-                    {cta}
-                  </Button>
-                </Link>
+        {PLANS.map(
+          ({ name, price, period, tagline, cta, features, featured }) => (
+            <div
+              key={name}
+              data-pricing-card
+              className={
+                featured
+                  ? "relative flex flex-col rounded-2xl border border-primary/40 bg-card p-7 shadow-lg shadow-primary/10 ring-1 ring-primary/20"
+                  : "relative flex flex-col rounded-2xl border border-border bg-muted/40 p-7"
+              }
+            >
+              {featured && (
+                <Badge className="absolute -top-3 right-6" variant="default">
+                  Most Popular
+                </Badge>
               )}
+
+              <h3 className="text-lg font-semibold">{name}</h3>
+
+              <p className="mt-3 text-sm text-muted-foreground">{tagline}</p>
+
+              <div className="mt-6 flex items-baseline gap-1">
+                <span className="text-4xl font-bold tracking-tight">
+                  $<span data-price-value={price}>{price}</span>
+                </span>
+                <span className="text-sm text-muted-foreground">{period}</span>
+              </div>
+
+              <ul className="mt-6 flex flex-col gap-3">
+                {features.map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-center gap-2.5 text-sm"
+                  >
+                    <Check className="size-4 shrink-0 text-primary" /> {feature}
+                  </li>
+                ))}
+              </ul>
+
+              {/* mt-auto pins CTAs to the card bottom so both stay aligned */}
+              <div className="mt-auto pt-8">
+                {featured ? (
+                  <Link
+                    href={isSignedIn ? "/settings/billing" : "/sign-up"}
+                    className="block"
+                  >
+                    <Button variant="glossy" size="lg" className="w-full">
+                      <Sparkles className="size-4" /> {cta}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link
+                    href={isSignedIn ? "/chat" : "/sign-up"}
+                    className="block"
+                  >
+                    <Button variant="glossy" size="lg" className="w-full">
+                      {cta}
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ),
+        )}
       </div>
     </section>
   );
