@@ -603,16 +603,14 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean;
 }) {
-  // Random width between 50 to 90%.
-  const [width] = React.useState(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`;
-  });
-
   return (
     <div
       data-slot="sidebar-menu-skeleton"
       data-sidebar="menu-skeleton"
-      className={cn("flex h-8 items-center gap-2 rounded-md px-2", className)}
+      className={cn(
+        "flex min-w-0 flex-col items-start rounded-md px-2 py-1.5",
+        className,
+      )}
       {...props}
     >
       {showIcon && (
@@ -622,13 +620,12 @@ function SidebarMenuSkeleton({
         />
       )}
       <Skeleton
-        className="h-4 max-w-(--skeleton-width) flex-1"
+        className="h-3.5 w-full rounded-sm"
         data-sidebar="menu-skeleton-text"
-        style={
-          {
-            "--skeleton-width": width,
-          } as React.CSSProperties
-        }
+      />
+      <Skeleton
+        className="mt-0.5 h-3 w-1/2 rounded-sm"
+        data-sidebar="menu-skeleton-date"
       />
     </div>
   );

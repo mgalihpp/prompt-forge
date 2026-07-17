@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { FolderOpen, Hammer, LayoutTemplate, Settings2 } from "lucide-react";
+import { FolderOpen, LayoutTemplate, Settings2 } from "lucide-react";
+import { ForgyLogo } from "@/components/forgy-logo";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -26,32 +27,7 @@ import { UsageCard } from "@/features/chat/components/usage-card";
 import { orpc } from "@/lib/orpc/client";
 import { getQueryClient } from "@/lib/query-client.server";
 
-// The awaited prefetch lives in an inner async component so the shell can
-// stream: while it resolves, Suspense shows the same shell whose client
-// components (HistoryGroup, UsageCard) render their built-in skeletons.
-// A loading.tsx can't do this — it renders *inside* the layout, so an
-// awaiting layout would block it too.
-async function Prefetched({
-  defaultOpen,
-  children,
-}: {
-  defaultOpen: boolean;
-  children: React.ReactNode;
-}) {
-  const queryClient = getQueryClient();
-  await Promise.all([
-    queryClient.prefetchQuery(orpc.history.threads.queryOptions()),
-    queryClient.prefetchQuery(orpc.user.usage.queryOptions()),
-  ]);
-
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ChatShell defaultOpen={defaultOpen}>{children}</ChatShell>
-    </HydrationBoundary>
-  );
-}
-
-function ChatShell({
+function ChatLayoutInner({
   defaultOpen,
   children,
 }: {
@@ -70,9 +46,7 @@ function ChatShell({
                 tooltip="Prompt Forge"
                 className="group-data-[collapsible=icon]:hidden hover:bg-transparent"
               >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Hammer className="size-4" />
-                </div>
+                <ForgyLogo className="size-9" />
                 <span className="font-semibold">Prompt Forge</span>
               </SidebarMenuButton>
               <SidebarTrigger />
@@ -131,7 +105,9 @@ function ChatShell({
             <div id="right-sidebar-trigger-slot" />
           </div>
         </header>
-        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <Suspense fallback={<ChatPageSkeleton />}>{children}</Suspense>
+        </div>
       </SidebarInset>
 
       {/* RIGHT: utility/settings — independent provider = independent toggle */}
@@ -157,18 +133,20 @@ export default async function ChatLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Restore left sidebar state from cookie so SSR matches client (no flash).
   const defaultOpen = (await cookies()).get("sidebar_state")?.value !== "false";
+  const queryClient = getQueryClient();
+
+  // Prefetch data into the server-side QueryClient so the dehydrated state
+  // is available to client components during SSR — eliminates hydration
+  // mismatches on UsageCard and HistoryGroup.
+  await Promise.all([
+    queryClient.prefetchQuery(orpc.history.threads.queryOptions()),
+    queryClient.prefetchQuery(orpc.user.usage.queryOptions()),
+  ]);
 
   return (
-    <Suspense
-      fallback={
-        <ChatShell defaultOpen={defaultOpen}>
-          <ChatPageSkeleton />
-        </ChatShell>
-      }
-    >
-      <Prefetched defaultOpen={defaultOpen}>{children}</Prefetched>
-    </Suspense>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ChatLayoutInner defaultOpen={defaultOpen}>{children}</ChatLayoutInner>
+    </HydrationBoundary>
   );
 }
