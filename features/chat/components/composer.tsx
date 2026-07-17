@@ -18,10 +18,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useCreateThread } from "@/lib/hooks/use-history";
 import { chat } from "../chat-instance";
 import { OPTIONS } from "../constants";
 import { useSendText } from "../send";
 import { useChatStore } from "../store";
+import { ModelSelector } from "./model-selector";
 
 function useChatStatus() {
   return useSyncExternalStore(
@@ -62,7 +64,8 @@ export function Composer() {
   const toggleDeepForge = useChatStore((s) => s.toggleDeepForge);
 
   const status = useChatStatus();
-  const busy = status === "submitted" || status === "streaming";
+  const { isPending: creatingThread } = useCreateThread();
+  const busy = status === "submitted" || status === "streaming" || creatingThread;
   const busyRef = useRef(false);
   busyRef.current = busy;
 
@@ -85,6 +88,8 @@ export function Composer() {
           <ChatInput onSend={send} />
 
           <div className="flex items-center gap-1.5 px-1 pb-1">
+            <ModelSelector />
+
             <DropdownMenu>
               <Tooltip>
                 <DropdownMenuTrigger

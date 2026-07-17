@@ -20,7 +20,7 @@ export function useSendText() {
       const busy = chat.status === "submitted" || chat.status === "streaming";
       if (!text || busy) return;
 
-      const { opts, deepForge, threadId } = useChatStore.getState();
+      const { opts, deepForge, threadId, model } = useChatStore.getState();
 
       // Lazily create the history thread on the first message. If it fails,
       // the chat still works — the exchange just isn't persisted.
@@ -39,7 +39,10 @@ export function useSendText() {
         }
       }
 
-      chat.sendMessage({ text }, { body: { opts, deepForge, threadId: tid } });
+      chat.sendMessage(
+        { text },
+        { body: { opts, deepForge, threadId: tid, model } },
+      );
     },
     [createThread],
   );

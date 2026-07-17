@@ -9,7 +9,7 @@ import {
   toUIMessageStream,
   type UIMessage,
 } from "ai";
-import { chatModel } from "@/lib/ai";
+import { chatModel, resolveModel } from "@/lib/ai";
 import {
   bestLabel,
   DeepForgeReviewSchema,
@@ -30,6 +30,7 @@ import {
   systemPrompt,
   variantSystemPrompt,
 } from "@/lib/forge-prompt";
+import { isFreeModelId } from "@/lib/models";
 import { prisma } from "@/lib/prisma";
 import { checkUsage, LIMIT_MESSAGE, trySpendPrompt } from "@/lib/usage";
 
@@ -41,6 +42,7 @@ type Body = {
   deepForge?: boolean;
   threadId?: string; // set by the composer after history.createThread
   mode?: "send" | "regenerate";
+  model?: string | null; // free OpenRouter model id chosen in the composer
 };
 
 const HISTORY_CAP = 100;
@@ -151,7 +153,14 @@ export async function POST(req: Request) {
     return new Response(LIMIT_MESSAGE, { status: 429 });
   }
 
-  const { messages, opts, deepForge, threadId, mode }: Body = await req.json();
+  const { messages, opts, deepForge, threadId, mode, model }: Body =
+    await req.json();
+
+  // Only honour a model the free catalog currently vouches for — anything
+  // else (paid, unknown, or spoofed) falls back to the default. Validated
+  // once here so both the standard and deep-forge paths share the choice.
+  const activeModel =
+    model && (await isFreeModelId(model)) ? resolveModel(model) : chatModel;
 
   const modelMessages = await convertToModelMessages(canonicalize(messages));
   const userText = textOf(messages.at(-1));
@@ -159,7 +168,7 @@ export async function POST(req: Request) {
   // Standard heat: one streamed forge. Fast path, streaming UX preserved.
   if (!deepForge) {
     const result = streamText({
-      model: chatModel,
+      model: activeModel,
       system: systemPrompt(opts, false),
       messages: modelMessages,
       onFinish: async ({ text }) => {
@@ -218,7 +227,7 @@ export async function POST(req: Request) {
         VARIANT_LABELS.map(async (label) => {
           try {
             const result = streamText({
-              model: chatModel,
+              model: activeModel,
               system: variantSystemPrompt(opts, label),
               messages: modelMessages,
               maxOutputTokens: 1600,
@@ -244,7 +253,7 @@ export async function POST(req: Request) {
       let review: ForgeReviewData;
       try {
         const { object } = await generateObject({
-          model: chatModel,
+          model: activeModel,
           schema: DeepForgeReviewSchema,
           system: critiqueSystemPrompt(),
           prompt: critiqueUserPrompt(userText, Object.values(variants)),
