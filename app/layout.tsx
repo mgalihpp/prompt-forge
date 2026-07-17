@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Prompt Forge",
   description: "Build and manage AI prompts",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

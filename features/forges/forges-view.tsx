@@ -4,12 +4,12 @@ import { formatDistanceToNow } from "date-fns";
 import {
   Check,
   Copy,
-  Hammer,
   Link2,
   Link2Off,
   Star,
   Trash2,
 } from "lucide-react";
+import { ForgyLogo } from "@/components/forgy-logo";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -63,7 +63,7 @@ export function ForgesView() {
       <Empty className="border py-16">
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <Hammer />
+            <ForgyLogo className="size-10" />
           </EmptyMedia>
           <EmptyTitle>Couldn't load your forges</EmptyTitle>
           <EmptyDescription>Make sure you're signed in.</EmptyDescription>
@@ -83,7 +83,7 @@ export function ForgesView() {
       <Empty className="border py-16">
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <Hammer />
+            <ForgyLogo className="size-10" />
           </EmptyMedia>
           <EmptyTitle>
             {filter === "favorites"

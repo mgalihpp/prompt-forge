@@ -1,5 +1,5 @@
-import { Hammer } from "lucide-react";
 import Link from "next/link";
+import { ForgyLogo } from "@/components/forgy-logo";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -11,9 +11,7 @@ export default function ShareLoading() {
         href="/chat"
         className="flex items-center gap-2 text-sm font-medium"
       >
-        <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Hammer className="size-4" />
-        </div>
+        <ForgyLogo className="size-6" />
         Prompt Forge
       </Link>
 

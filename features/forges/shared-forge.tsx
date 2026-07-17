@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy, Hammer } from "lucide-react";
+import { Check, Copy } from "lucide-react";
+import { ForgyLogo } from "@/components/forgy-logo";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -34,9 +35,7 @@ export function SharedForge({ shareId }: { shareId: string }) {
         href="/chat"
         className="flex items-center gap-2 text-sm font-medium"
       >
-        <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Hammer className="size-4" />
-        </div>
+        <ForgyLogo className="size-6" />
         Prompt Forge
       </Link>
 
