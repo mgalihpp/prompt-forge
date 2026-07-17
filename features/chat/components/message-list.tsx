@@ -1,8 +1,10 @@
 import { useChat } from "@ai-sdk/react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { LIMIT_MESSAGE } from "@/lib/plans";
 import { chat } from "../chat-instance";
 import { useForgyState } from "../hooks/use-forgy-state";
 import { useChatStore } from "../store";
+import { useUpgradeDialog } from "../upgrade-dialog-store";
 import { collectText } from "./collect-text";
 import { EmptyState } from "./empty-state";
 import { ErrorNotice } from "./error-notice";
@@ -11,6 +13,13 @@ import { TypingIndicator } from "./typing-indicator";
 
 export function MessageList() {
   const { messages, status, error, regenerate } = useChat({ chat });
+  const openUpgrade = useUpgradeDialog((s) => s.setOpen);
+
+  // Server 429 fallback: if a send slipped past the composer's pre-check and
+  // hit the daily limit, surface the upgrade dialog.
+  useEffect(() => {
+    if (error?.message.includes(LIMIT_MESSAGE)) openUpgrade(true);
+  }, [error, openUpgrade]);
 
   // Regenerate must carry the same body as a fresh send, or deep forge
   // silently downgrades to a standard forge.
