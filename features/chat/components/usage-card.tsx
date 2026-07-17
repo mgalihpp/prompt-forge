@@ -37,7 +37,7 @@ function UsageCardContent({
 }) {
   if (plan === "pro") {
     return (
-      <div className="btn-shine [--shine-opacity:0.14] relative overflow-hidden rounded-lg border border-primary/30 bg-linear-to-r from-primary/15 via-primary/5 to-primary/15 px-3 py-2.5">
+      <>
         {/* Corner glow so the Pro state reads richer than the flat free card */}
         <div
           aria-hidden
@@ -52,7 +52,7 @@ function UsageCardContent({
             Unlimited
           </span>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -92,7 +92,11 @@ export function UsageCard() {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border bg-sidebar-accent/50 p-3 transition-opacity duration-300",
+        "flex flex-col gap-3 rounded-xl border p-3 transition-opacity duration-300",
+        // Pro styles the card itself — no inner panel, no card-in-card
+        plan === "pro"
+          ? "btn-shine [--shine-opacity:0.12] relative overflow-hidden border-primary/30 bg-linear-to-r from-primary/15 via-primary/5 to-primary/15"
+          : "bg-sidebar-accent/50",
         "group-data-[collapsible=icon]:hidden",
       )}
     >

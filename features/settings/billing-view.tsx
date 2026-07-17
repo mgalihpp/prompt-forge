@@ -133,28 +133,22 @@ export function BillingView() {
 
           <div className="mt-auto pt-8">
             {isPro ? (
-              <div className="btn-shine [--shine-opacity:0.14] relative overflow-hidden rounded-xl border border-primary/30 bg-linear-to-r from-primary/15 via-primary/5 to-primary/15 px-4 py-3">
-                {/* Ambient glow in the corner keeps the panel from feeling flat */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full bg-primary/25 blur-2xl"
-                />
-                <div className="relative flex items-center gap-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30">
-                    <Zap className="size-4 text-primary" />
+              // Flat row — the Pro card itself is already the container
+              <div className="flex items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30">
+                  <Zap className="size-4 text-primary" />
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-sm font-semibold">
+                    Unlimited prompts
                   </span>
-                  <span className="flex flex-col">
-                    <span className="text-sm font-semibold">
-                      Unlimited prompts
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground tabular-nums">
-                        {used}
-                      </span>{" "}
-                      forged today — keep going
-                    </span>
+                  <span className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground tabular-nums">
+                      {used}
+                    </span>{" "}
+                    forged today — keep going
                   </span>
-                </div>
+                </span>
               </div>
             ) : (
               <UpgradeButton className="w-full" />
